@@ -5,7 +5,11 @@ Role: Intercepts traffic and consults the Reflex Engine (L5).
 import os
 import asyncio
 import aiohttp
+import uuid
+import json
+import time
 from mitmproxy import http
+from mitmproxy.script import concurrent
 from mitmproxy.script import concurrent
 
 # Configuration
@@ -42,8 +46,20 @@ class VeilInterceptor:
 
         # L1 Handshake Headers
         auth_headers = {
-            "X-Internal-Token": INTERNAL_TOKEN
+            "X-Internal-Token": INTERNAL_TOKEN # Phase 2: Verified Injection
         }
+
+        # L2 Intent Declaration (Phase 3: Cognitive Accountability)
+        # For MVP: Proxy generates a "mock intent" since real agents aren't integrated yet
+        intent_payload = {
+            "goal": "proxy_forward",
+            "action": f"POST /v1/assess",  # The action WE are taking to the Engine
+            "justification": f"Forwarding intercepted request to {flow.request.pretty_host}",
+            "risk_level": "low",
+            "nonce": str(uuid.uuid4()),
+            "timestamp": int(time.time())
+        }
+        auth_headers["X-Veil-Intent"] = json.dumps(intent_payload)
 
         try:
             async with aiohttp.ClientSession() as session:
