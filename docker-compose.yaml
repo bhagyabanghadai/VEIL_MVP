@@ -17,7 +17,7 @@ services:
     depends_on:
       - veil-engine
     networks:
-      - veil-network
+      - veil-net-phase1
 
   # Layers 1-5: The Reflex Engine (The Nervous System)
   # Role: Fast, Async Decision Engine
@@ -34,7 +34,7 @@ services:
     depends_on:
       - redis
     networks:
-      - veil-network
+      - veil-net-phase1
 
   # Layer 7 Storage: Memory & Queue
   redis:
@@ -43,8 +43,8 @@ services:
     ports:
       - "6379:6379"
     networks:
-      - veil-network
+      - veil-net-phase1
 
 networks:
-  veil-network:
+  veil-net-phase1:
     driver: bridge
