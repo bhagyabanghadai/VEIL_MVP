@@ -7,9 +7,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from ..config import get_settings
 
 class L1IdentityMiddleware(BaseHTTPMiddleware):
+    # Paths that bypass Identity checks (public routes)
+    BYPASS_PATHS = ["/health", "/dashboard", "/api/v1/stats", "/api/v1/health"]
+
     async def dispatch(self, request: Request, call_next):
-        # Allow health check without token
-        if request.url.path == "/health":
+        # Allow whitelisted paths without token
+        if any(request.url.path.startswith(p) for p in self.BYPASS_PATHS):
             return await call_next(request)
 
         # 1. Extract Token

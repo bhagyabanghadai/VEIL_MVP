@@ -1,0 +1,5 @@
+{
+  "name": "VEIL",
+  "description": "AI Identity & Trust Layer scaffold for managing agent permissions and auditing actions.",
+  "requestFramePermissions": []
+}

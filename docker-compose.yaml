@@ -31,6 +31,15 @@ services:
     networks:
       - veil-net-phase1
 
+  veil-ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - veil-net-phase1
+
   veil-engine:
     image: python:3.11-slim
     container_name: veil-engine
@@ -58,6 +67,10 @@ services:
       - "6379:6379"
     networks:
       - veil-net-phase1
+
+volumes:
+  ollama_data:
+
 
 networks:
   veil-net-phase1:

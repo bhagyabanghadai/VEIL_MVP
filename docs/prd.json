@@ -1,0 +1,71 @@
+{
+    "project_name": "VEIL - 7-Layer Sentinel",
+    "version": "0.1.0",
+    "root_path": ".",
+    "tasks": [
+        {
+            "id": 1,
+            "title": "Layer 0: Infrastructure Setup (Envoy & Docker)",
+            "description": "Create `envoy.yaml` to intercept traffic on port 10000 and `docker-compose.yaml` to orchestrate the Sidecar pattern with Envoy, Redis, and Postgres.",
+            "files": [
+                "envoy.yaml",
+                "docker-compose.yaml"
+            ],
+            "skills": [
+                "backend-architect"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": 2,
+            "title": "Layer 1: Runtime Identity Service",
+            "description": "Implement `RuntimeIdentityService.java` to verify local process identity. Use a mock implementation initially if OS-level access is restricted.",
+            "files": [
+                "backend/src/main/java/com/veil/services/identity/RuntimeIdentityService.java"
+            ],
+            "skills": [
+                "backend-security-coder",
+                "java-pro"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": 3,
+            "title": "Layer 3: Deterministic Rule Engine",
+            "description": "Implement `DeterministicRuleEngine.java` for hard policy checks (e.g., blocking specific paths like /admin).",
+            "files": [
+                "backend/src/main/java/com/veil/services/policy/DeterministicRuleEngine.java"
+            ],
+            "skills": [
+                "backend-security-coder",
+                "java-pro"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": 4,
+            "title": "Layer 5: Traffic Light Service (Core Logic)",
+            "description": "Implement `TrafficLightService.java` to coordinate Layer 1 (Identity) -> Layer 3 (Rules) -> Layer 4 (Judges) and return a RiskLevel.",
+            "files": [
+                "backend/src/main/java/com/veil/services/traffic/TrafficLightService.java"
+            ],
+            "skills": [
+                "java-pro",
+                "backend-architect"
+            ],
+            "status": "pending"
+        },
+        {
+            "id": 5,
+            "title": "Integration: Veil Security Filter",
+            "description": "Modify `VeilSecurityFilter.java` to inject `TrafficLightService` and enforce the 7-layer check on incoming requests.",
+            "files": [
+                "backend/src/main/java/com/veil/security/VeilSecurityFilter.java"
+            ],
+            "skills": [
+                "java-pro"
+            ],
+            "status": "pending"
+        }
+    ]
+}

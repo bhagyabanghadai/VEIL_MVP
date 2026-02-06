@@ -26,9 +26,12 @@ class L2IntentMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.nonce_service = NonceService()
 
+    # Paths that bypass Intent checks (public routes)
+    BYPASS_PATHS = ["/health", "/docs", "/openapi.json", "/dashboard", "/api/v1/stats", "/api/v1/health"]
+
     async def dispatch(self, request: Request, call_next):
-        # Bypass for health checks and internal endpoints
-        if request.url.path in ["/health", "/docs", "/openapi.json"]:
+        # Bypass for whitelisted paths
+        if any(request.url.path.startswith(p) for p in self.BYPASS_PATHS):
             return await call_next(request)
 
         # 1. Extract Intent Header

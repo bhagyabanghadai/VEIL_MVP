@@ -10,7 +10,7 @@ import time
 import os
 
 ENGINE_URL = os.getenv("ENGINE_URL", "http://localhost:8000")
-INTERNAL_TOKEN = "dev-secret-token"
+INTERNAL_TOKEN = "dev-secret-token-CHANGE-IN-PROD"
 
 class TestL3PolicyEngine:
     """

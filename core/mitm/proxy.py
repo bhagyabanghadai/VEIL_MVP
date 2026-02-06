@@ -14,7 +14,7 @@ from mitmproxy.script import concurrent
 
 # Configuration
 REFLEX_ENGINE_URL = os.getenv("REFLEX_ENGINE_URL", "http://localhost:8000")
-INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN", "dev-secret-token")
+INTERNAL_TOKEN = os.getenv("INTERNAL_TOKEN", "dev-secret-token-CHANGE-IN-PROD")
 VERIFY_SSL = False  # Internal communication
 
 class VeilInterceptor:

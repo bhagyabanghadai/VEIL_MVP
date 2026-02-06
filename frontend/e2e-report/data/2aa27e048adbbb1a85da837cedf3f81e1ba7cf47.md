@@ -1,0 +1,312 @@
+# Page snapshot
+
+```yaml
+- main [ref=e3]:
+  - generic:
+    - generic:
+      - img
+    - generic:
+      - img
+    - generic:
+      - img
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e7]
+      - generic [ref=e10]: VEIL
+    - navigation [ref=e11]:
+      - link "Platform" [ref=e12] [cursor=pointer]:
+        - /url: "#features"
+      - link "Developers" [ref=e13] [cursor=pointer]:
+        - /url: "#sdk"
+      - link "Security" [ref=e14] [cursor=pointer]:
+        - /url: "#security"
+      - link "Pricing" [ref=e15] [cursor=pointer]:
+        - /url: "#pricing"
+    - button "Initialize" [ref=e16] [cursor=pointer]
+  - generic [ref=e17]:
+    - generic [ref=e19]:
+      - generic:
+        - heading "VEIL" [level=1]
+        - generic:
+          - generic: Verified Ethereal Identity Ledger
+      - generic:
+        - generic:
+          - generic:
+            - generic: Velocity
+            - generic: 3400 T/s
+          - generic:
+            - generic: Security
+            - generic: GRADE A
+      - generic [ref=e26]: Initialize
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - heading "S H A R P" [level=2] [ref=e32]:
+          - generic [ref=e33]: S
+          - generic [ref=e34]: H
+          - generic [ref=e35]: A
+          - generic [ref=e36]: R
+          - generic [ref=e37]: P
+        - heading "P O W E R F U L" [level=2] [ref=e39]:
+          - generic [ref=e40]: P
+          - generic [ref=e41]: O
+          - generic [ref=e42]: W
+          - generic [ref=e43]: E
+          - generic [ref=e44]: R
+          - generic [ref=e45]: F
+          - generic [ref=e46]: U
+          - generic [ref=e47]: L
+        - heading "L I G H T" [level=2] [ref=e49]:
+          - generic [ref=e50]: L
+          - generic [ref=e51]: I
+          - generic [ref=e52]: G
+          - generic [ref=e53]: H
+          - generic [ref=e54]: T
+        - heading "F A S T" [level=2] [ref=e56]:
+          - generic [ref=e57]: F
+          - generic [ref=e58]: A
+          - generic [ref=e59]: S
+          - generic [ref=e60]: T
+      - generic [ref=e61]:
+        - paragraph [ref=e62]: The ultimate protection architecture.
+        - paragraph [ref=e63]: Designed to win the war on entropy. VEIL answers its calling on the very first packet. Sharp enough to cut through noise. Powerful enough to stop threats.
+    - generic [ref=e70]:
+      - generic [ref=e71]:
+        - heading "SECURITY METRICS" [level=3] [ref=e72]
+        - generic [ref=e73]: VEIL Platform / Live Stats
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e79]: DAT.01
+          - generic [ref=e81]:
+            - generic [ref=e82]: 0%
+            - generic [ref=e83]:
+              - generic [ref=e84]: THREAT DETECTION
+              - generic [ref=e85]: ACCURACY
+        - generic [ref=e86]:
+          - generic [ref=e90]: DAT.02
+          - generic [ref=e92]:
+            - generic [ref=e93]: 0<ms
+            - generic [ref=e94]:
+              - generic [ref=e95]: RESPONSE TIME
+              - generic [ref=e96]: LATENCY
+        - generic [ref=e97]:
+          - generic [ref=e101]: DAT.03
+          - generic [ref=e103]:
+            - generic [ref=e104]: 10K+
+            - generic [ref=e105]:
+              - generic [ref=e106]: AGENTS PROTECTED
+              - generic [ref=e107]: ACTIVE
+        - generic [ref=e108]:
+          - generic [ref=e112]: DAT.04
+          - generic [ref=e114]:
+            - generic [ref=e115]: 0%
+            - generic [ref=e116]:
+              - generic [ref=e117]: UPTIME
+              - generic [ref=e118]: SLA
+      - generic [ref=e119]:
+        - generic [ref=e120]: Security Operations
+        - generic [ref=e121]: Real-Time Monitoring
+    - generic [ref=e123]:
+      - generic [ref=e124]:
+        - generic [ref=e127]: System Architecture
+        - heading "SECURITY ARCHITECTURE" [level=2] [ref=e128]:
+          - text: SECURITY
+          - text: ARCHITECTURE
+        - paragraph [ref=e129]: Four integrated layers working in harmony to provide comprehensive protection.
+      - generic [ref=e130]:
+        - generic [ref=e133]:
+          - generic [ref=e136]: "01"
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - heading "IDENTITY" [level=3] [ref=e140]
+              - generic [ref=e142]: LAYER
+            - paragraph [ref=e143]: Cryptographic agent verification and trust profiling
+            - generic [ref=e144]:
+              - generic [ref=e147]: Agent passports
+              - generic [ref=e150]: Trust profiling
+              - generic [ref=e153]: Misuse scoring
+              - generic [ref=e156]: Identity verification
+            - generic [ref=e157]:
+              - generic [ref=e159]: Operational
+              - generic [ref=e161]: Layer 01/04
+        - generic [ref=e164]:
+          - generic [ref=e167]: "02"
+          - generic [ref=e168]:
+            - generic [ref=e169]:
+              - heading "FIREWALL" [level=3] [ref=e171]
+              - generic [ref=e173]: LAYER
+            - paragraph [ref=e174]: Real-time policy enforcement with deep reasoning
+            - generic [ref=e175]:
+              - generic [ref=e178]: Policy enforcement
+              - generic [ref=e181]: Real-time blocking
+              - generic [ref=e184]: Deep reasoning AI
+              - generic [ref=e187]: Threat detection
+            - generic [ref=e188]:
+              - generic [ref=e190]: Operational
+              - generic [ref=e192]: Layer 02/04
+        - generic [ref=e195]:
+          - generic [ref=e198]: "03"
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - heading "AUDIT" [level=3] [ref=e202]
+              - generic [ref=e204]: LAYER
+            - paragraph [ref=e205]: Immutable cryptographic ledger for compliance
+            - generic [ref=e206]:
+              - generic [ref=e209]: Immutable ledger
+              - generic [ref=e212]: Action logging
+              - generic [ref=e215]: Compliance reports
+              - generic [ref=e218]: Forensic analysis
+            - generic [ref=e219]:
+              - generic [ref=e221]: Operational
+              - generic [ref=e223]: Layer 03/04
+        - generic [ref=e226]:
+          - generic [ref=e229]: "04"
+          - generic [ref=e230]:
+            - generic [ref=e231]:
+              - heading "INTELLIGENCE" [level=3] [ref=e233]
+              - generic [ref=e235]: LAYER
+            - paragraph [ref=e236]: Gemini-powered threat intelligence and pattern recognition
+            - generic [ref=e237]:
+              - generic [ref=e240]: Gemini 2.5 Flash
+              - generic [ref=e243]: Deep reasoning
+              - generic [ref=e246]: Threat intelligence
+              - generic [ref=e249]: Pattern recognition
+            - generic [ref=e250]:
+              - generic [ref=e252]: Operational
+              - generic [ref=e254]: Layer 04/04
+    - generic [ref=e261]:
+      - generic [ref=e263]:
+        - generic [ref=e266]: MONITORING ACTIVE
+        - heading "SYSTEM INTEGRITY" [level=2] [ref=e267]
+        - paragraph [ref=e268]: Version 2.4.1 • Uptime 99.99% • 00:14:53 UTC
+      - generic [ref=e271]:
+        - generic [ref=e272]:
+          - generic [ref=e273]:
+            - generic [ref=e276]: ALL SYSTEMS NOMINAL
+            - generic [ref=e278]: VEIL SECURITY DASHBOARD
+          - generic [ref=e279]:
+            - generic [ref=e280]: "REGION: GLOBAL"
+            - generic [ref=e281]: "NODE: PRIMARY"
+        - generic [ref=e282]:
+          - generic [ref=e283]:
+            - generic [ref=e285]:
+              - generic [ref=e286]: FW-01
+              - generic [ref=e287]: NOMINAL
+            - generic [ref=e289]:
+              - heading "NEURAL FIREWALL" [level=3] [ref=e290]
+              - generic [ref=e291]:
+                - generic [ref=e292]: 99.96%
+                - generic [ref=e293]: +0.02%
+              - generic [ref=e294]:
+                - generic [ref=e295]: BLOCK RATE
+                - generic [ref=e296]: • Last 24h
+            - generic [ref=e298]:
+              - generic [ref=e299]:
+                - generic [ref=e300]: Requests
+                - text: 2.4M
+              - generic [ref=e301]:
+                - generic [ref=e302]: Blocked
+                - text: "847"
+          - generic [ref=e312]:
+            - generic [ref=e314]:
+              - generic [ref=e315]: ID-02
+              - generic [ref=e316]: ONLINE
+            - generic [ref=e318]:
+              - heading "IDENTITY BRIDGE" [level=3] [ref=e319]
+              - generic [ref=e320]:
+                - generic [ref=e321]: ACTIVE
+                - generic [ref=e322]: 153/s
+              - generic [ref=e323]:
+                - generic [ref=e324]: ZK PROOFS
+                - generic [ref=e325]: • Verification
+            - generic [ref=e327]:
+              - generic [ref=e328]:
+                - generic [ref=e329]: Requests
+                - text: 1.2M
+              - generic [ref=e330]:
+                - generic [ref=e331]: Blocked
+                - text: N/A
+          - generic [ref=e341]:
+            - generic [ref=e343]:
+              - generic [ref=e344]: LG-03
+              - generic [ref=e345]: VERIFIED
+            - generic [ref=e347]:
+              - heading "AUDIT LEDGER" [level=3] [ref=e348]
+              - generic [ref=e349]:
+                - generic [ref=e350]: 100%
+                - generic [ref=e351]: 12.4K blocks
+              - generic [ref=e352]:
+                - generic [ref=e353]: INTEGRITY
+                - generic [ref=e354]: • Chain Valid
+            - generic [ref=e356]:
+              - generic [ref=e357]:
+                - generic [ref=e358]: Requests
+                - text: 892.0K
+              - generic [ref=e359]:
+                - generic [ref=e360]: Blocked
+                - text: "0"
+          - generic [ref=e370]:
+            - generic [ref=e372]:
+              - generic [ref=e373]: EM-04
+              - generic [ref=e374]: OPTIMAL
+            - generic [ref=e376]:
+              - heading "EDGE MESH" [level=3] [ref=e377]
+              - generic [ref=e378]:
+                - generic [ref=e379]: 3.1ms
+                - generic [ref=e380]: "-0.4ms"
+              - generic [ref=e381]:
+                - generic [ref=e382]: AVG LATENCY
+                - generic [ref=e383]: "• P95: 8.1ms"
+            - generic [ref=e385]:
+              - generic [ref=e386]:
+                - generic [ref=e387]: Requests
+                - text: 4.1M
+              - generic [ref=e388]:
+                - generic [ref=e389]: Blocked
+                - text: "12"
+        - generic [ref=e399]:
+          - generic [ref=e400]:
+            - generic [ref=e401]: "CPU: 23%"
+            - generic [ref=e402]: "MEM: 4.2GB"
+            - generic [ref=e403]: "NET: 125Mb/s"
+          - generic [ref=e405]: ENCRYPTED CONNECTION
+    - generic [ref=e408]:
+      - generic:
+        - heading "VEIL" [level=1]
+      - generic [ref=e409]:
+        - paragraph [ref=e410]: The Future of Autonomy
+        - heading "SECURE THE FLEET" [level=2] [ref=e411]:
+          - text: SECURE
+          - text: THE FLEET
+        - button "INITIALIZE PROTOCOL" [ref=e412] [cursor=pointer]:
+          - generic [ref=e413]: INITIALIZE PROTOCOL
+          - img [ref=e414]
+      - generic [ref=e416]:
+        - generic [ref=e417]:
+          - generic [ref=e418]:
+            - link "Privacy Policy" [ref=e419] [cursor=pointer]:
+              - /url: /privacy
+              - text: Privacy Policy
+            - link "Terms of Service" [ref=e420] [cursor=pointer]:
+              - /url: /terms
+              - text: Terms of Service
+            - link "Security" [ref=e421] [cursor=pointer]:
+              - /url: /security
+              - text: Security
+          - generic [ref=e422]:
+            - text: Look Cycle
+            - text: Inspiration
+        - generic [ref=e423]:
+          - generic [ref=e424]:
+            - link "Follow VEIL on Twitter" [ref=e425] [cursor=pointer]:
+              - /url: https://twitter.com/veilsystems
+              - text: Twitter
+            - link "View VEIL on GitHub" [ref=e426] [cursor=pointer]:
+              - /url: https://github.com/veilsystems
+              - text: GitHub
+            - link "Join VEIL Discord" [ref=e427] [cursor=pointer]:
+              - /url: https://discord.gg/veilsystems
+              - text: Discord
+          - generic [ref=e428]:
+            - text: VEIL Systems Inc
+            - text: © 2026
+```

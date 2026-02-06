@@ -11,7 +11,7 @@ import os
 
 ENGINE_URL = os.getenv("ENGINE_URL", "http://localhost:8000")
 PROXY_URL = os.getenv("PROXY_URL", "http://localhost:8090")
-INTERNAL_TOKEN = "dev-secret-token"
+INTERNAL_TOKEN = "dev-secret-token-CHANGE-IN-PROD"
 
 class TestL2IntentInterface:
     """

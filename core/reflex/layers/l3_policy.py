@@ -19,9 +19,12 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("veil.l3.policy")
 
 class L3PolicyMiddleware(BaseHTTPMiddleware):
+    # Paths that bypass Policy Engine (public routes)
+    BYPASS_PATHS = ["/health", "/docs", "/openapi.json", "/dashboard", "/api/v1/stats", "/api/v1/health"]
+
     async def dispatch(self, request: Request, call_next):
-        # Health checks bypass Policy Engine to ensure liveness
-        if request.url.path in ["/health", "/docs", "/openapi.json"]:
+        # Bypass for whitelisted paths
+        if any(request.url.path.startswith(p) for p in self.BYPASS_PATHS):
             return await call_next(request)
 
         # 1. Deep Context Inspection (Body Buffering)

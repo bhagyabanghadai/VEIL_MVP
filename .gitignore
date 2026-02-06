@@ -1,0 +1,30 @@
+# User Specific
+.gemini/
+.agent/
+.vscode/
+
+# Build Artifacts
+target/
+dist/
+node_modules/
+build/
+*.class
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# Environment & Secrets
+.env
+.env.local
+backend/src/main/resources/application-secret.properties
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+*.iml
+*.swp
