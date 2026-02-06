@@ -3,9 +3,9 @@ version: '3.8'
 services:
   # Layer 0: The Smart Valve (Mitmproxy)
   # Role: Intercepts all outgoing traffic from Agents
-  veil-proxy:
+  veil-proxy-v2:
     image: mitmproxy/mitmproxy:10.2.0
-    container_name: veil-proxy
+    container_name: veil-proxy-v2
     command: [ "mitmdump", "-s", "/app/core/mitm/proxy.py", "--listen-host", "0.0.0.0", "--listen-port", "8080", "--showhost" ]
     volumes:
       - ./:/app
