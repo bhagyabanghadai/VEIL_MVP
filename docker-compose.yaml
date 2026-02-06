@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Layer 0: The Smart Valve (Mitmproxy)
+  # Role: Intercepts all outgoing traffic from Agents
+  veil-proxy:
+    image: mitmproxy/mitmproxy:10.2.0
+    container_name: veil-proxy
+    command: ["mitmdump", "-s", "/app/core/mitm/proxy.py", "--listen-host", "0.0.0.0", "--listen-port", "8080", "--showhost"]
+    volumes:
+      - ./:/app
+    ports:
+      - "8080:8080" # Proxy Port
+      - "8081:8081" # Web Interface (if used)
+    environment:
+      - REFLEX_ENGINE_URL=http://veil-engine:8000
+    depends_on:
+      - veil-engine
+    networks:
+      - veil-network
+
+  # Layers 1-5: The Reflex Engine (The Nervous System)
+  # Role: Fast, Async Decision Engine
+  veil-engine:
+    image: python:3.11-slim
+    container_name: veil-engine
+    working_dir: /app
+    command: sh -c "pip install -e . && uvicorn core.reflex.main:app --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./:/app
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ENV=dev
+    depends_on:
+      - redis
+    networks:
+      - veil-network
+
+  # Layer 7 Storage: Memory & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: veil-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - veil-network
+
+networks:
+  veil-network:
+    driver: bridge
