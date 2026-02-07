@@ -12,6 +12,7 @@ core/reflex/models/__init__.py
 core/reflex/models/intent.py
 core/reflex/routes/__init__.py
 core/reflex/routes/dashboard.py
+core/reflex/routes/frontend_api.py
 core/reflex/services/__init__.py
 core/reflex/services/ledger.py
 core/reflex/services/llm_judge.py

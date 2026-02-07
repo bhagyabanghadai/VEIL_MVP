@@ -8,7 +8,7 @@ from ..config import get_settings
 
 class L1IdentityMiddleware(BaseHTTPMiddleware):
     # Paths that bypass Identity checks (public routes)
-    BYPASS_PATHS = ["/health", "/dashboard", "/api/v1/stats", "/api/v1/health"]
+    BYPASS_PATHS = ["/health", "/dashboard", "/api/v1/stats", "/api/v1/health", "/api/auth", "/api/agents", "/api/policies", "/api/logs", "/api/validate", "/api/insights"]
 
     async def dispatch(self, request: Request, call_next):
         # Allow whitelisted paths without token

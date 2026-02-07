@@ -17,7 +17,7 @@ logger = logging.getLogger("veil.l4.judge")
 
 class L4JudgeMiddleware(BaseHTTPMiddleware):
     # Paths that bypass Judge (public routes)
-    BYPASS_PATHS = ["/health", "/docs", "/openapi.json", "/dashboard", "/api/v1/stats", "/api/v1/health"]
+    BYPASS_PATHS = ["/health", "/docs", "/openapi.json", "/dashboard", "/api/v1/stats", "/api/v1/health", "/api/auth", "/api/agents", "/api/policies", "/api/logs", "/api/validate", "/api/insights"]
 
     def __init__(self, app):
         super().__init__(app)

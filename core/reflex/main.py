@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 from contextlib import asynccontextmanager
@@ -10,16 +11,27 @@ from .layers.l1_identity import L1IdentityMiddleware
 from .layers.l2_intent import L2IntentMiddleware
 from .layers.l3_policy import L3PolicyMiddleware
 from .routes.dashboard import router as dashboard_router
+from .routes.frontend_api import router as frontend_router
 
 settings = get_settings()
 
-app = FastAPI(title="VEIL Reflex Engine", version="7.0.0")
+app = FastAPI(title="VEIL Reflex Engine", version="9.0.0")
+
+# Enable CORS for frontend (running on port 3006)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3006", "http://127.0.0.1:3006"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Mount Dashboard Static Files and API
 dashboard_static_path = os.path.join(os.path.dirname(__file__), "..", "dashboard", "static")
 if os.path.exists(dashboard_static_path):
     app.mount("/dashboard", StaticFiles(directory=dashboard_static_path, html=True), name="dashboard")
 app.include_router(dashboard_router)
+app.include_router(frontend_router)
 
 # Apply Layer 3: Policy Engine (Wraps L1/L2? No, runs AFTER them but BEFORE app)
 # Wait, Starlette Middleware wraps from OUTSIDE IN.
