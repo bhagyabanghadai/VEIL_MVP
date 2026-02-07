@@ -64,7 +64,10 @@ export default {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-15px)' },
                 }
-            }
+            },
+            gridTemplateColumns: {
+                '24': 'repeat(24, minmax(0, 1fr))',
+            },
         },
     },
     plugins: [],

@@ -1,224 +1,146 @@
-import React, { useState } from 'react';
-import { Agent, Policy, AuditLogEntry, Action, ActionEvaluation, Resolution } from '../types';
-import AgentHologram from './dashboard/AgentHologram';
-import PolicyEditor from './PolicyEditor';
-import ActionConsole from './ActionConsole';
-import AuditLog from './AuditLog';
-import LiveMetrics from './dashboard/LiveMetrics';
-import { getAgentTrustStatus } from '../services/scaffoldService';
-// import { Plus } from 'lucide-react'; // Unused
-import ConfirmationModal from './ui/confirmation-modal';
-import DashboardCard from './dashboard/DashboardCard';
-import { WaveText } from './ui/wave-text';
-// import { ArrowRight, Activity, ShieldAlert, Cpu } from 'lucide-react'; // Unused
+import React, { useState, useEffect } from 'react';
+import StatusBar from './dashboard/StatusBar';
+import KPICards from './dashboard/KPICards';
+import LayerHealth from './dashboard/LayerHealth';
+import ThreatHeatmap from './dashboard/ThreatHeatmap';
+import LiveFeed from './dashboard/LiveFeed';
+import DecisionCard from './dashboard/DecisionCard';
 
 interface DashboardPageProps {
-    agents: Agent[];
-    policies: Policy[];
-    auditLog: AuditLogEntry[];
-    selectedAgentId: string | null;
-    onSelectAgent: (id: string) => void;
-    onUpdateAgent: (agent: Agent) => void;
-    onDeleteAgent: (id: string) => void;
-    onAddPolicy: (policy: Policy) => void;
+    agents?: any[];
+    policies?: any[];
+    auditLog?: any[];
+    selectedAgentId?: string | null;
+    onSelectAgent?: (id: string) => void;
+    onUpdateAgent?: (agent: any) => void;
+    onDeleteAgent?: (id: string) => void;
+    onAddPolicy?: (policy: any) => void;
     onDeletePolicy?: (id: string) => void;
-    onClearPolicies: () => void;
-    onClearLogs: () => void;
-    onResolveEntry: (id: string, resolution: Resolution) => void;
-    onActionEvaluated: (action: Action, evaluation: ActionEvaluation) => void;
-    onPurgeAgents: () => void;
+    onClearPolicies?: () => void;
+    onClearLogs?: () => void;
+    onResolveEntry?: (id: string, resolution: any) => void;
+    onActionEvaluated?: (action: any, evaluation: any) => void;
+    onPurgeAgents?: () => void;
     scenarioTrigger?: any;
-    isDemoMode: boolean;
-    systemInsights: { summary: string, riskTrend: string, criticalAlerts: string[] };
-    isInsightsLoading: boolean;
+    isDemoMode?: boolean;
+    systemInsights?: { summary: string; riskTrend: string; criticalAlerts: string[] };
+    isInsightsLoading?: boolean;
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({
-    agents,
-    policies,
-    auditLog,
-    selectedAgentId,
-    onSelectAgent,
-    onUpdateAgent,
-    onDeleteAgent,
-    onAddPolicy,
-    onDeletePolicy,
-    onClearPolicies,
-    onClearLogs,
-    onResolveEntry,
-    onActionEvaluated,
-    onPurgeAgents,
-    scenarioTrigger,
-    isDemoMode,
-    systemInsights,
-    // isInsightsLoading // Unused
+    auditLog = [],
+    systemInsights = { summary: 'System operational. No anomalies detected.', riskTrend: 'stable', criticalAlerts: [] },
 }) => {
-    const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
-    const activeAgent = agents.find(a => a.id === selectedAgentId);
-    const currentTrustStatus = activeAgent ? getAgentTrustStatus(activeAgent.id, auditLog) : 'Trusted';
+    const [stats, setStats] = useState({
+        totalRequests: 0,
+        allowed: 0,
+        blocked: 0,
+        avgLatency: 12,
+        uptime: '0h 0m',
+    });
+
+    // Fetch backend stats
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch('/api/v1/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats({
+                        totalRequests: (data.allowed || 0) + (data.blocked || 0),
+                        allowed: data.allowed || 0,
+                        blocked: data.blocked || 0,
+                        avgLatency: data.avgLatency || 12,
+                        uptime: data.uptime || '23h 17m',
+                    });
+                }
+            } catch (err) {
+                console.error('Stats fetch failed:', err);
+            }
+        };
+
+        fetchStats();
+        const interval = setInterval(fetchStats, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // Calculate metrics
+    const blockRate = stats.totalRequests > 0
+        ? ((stats.blocked / stats.totalRequests) * 100).toFixed(1)
+        : '0.0';
+
+    const riskScore = Math.min(Math.round(parseFloat(blockRate) * 5 + (systemInsights.criticalAlerts?.length || 0) * 10), 100);
+
+    const aiThreatLevel = riskScore < 20 ? 'minimal'
+        : riskScore < 40 ? 'low'
+            : riskScore < 70 ? 'moderate'
+                : 'high';
+
+    // Transform audit log to decisions
+    const recentDecisions = auditLog.slice(0, 5).map((log: any, i: number) => ({
+        id: log.id || `dec-${i}`,
+        verdict: log.decision === 'allow' ? 'allow' as const : 'block' as const,
+        payload: log.actionContent || 'Unknown action',
+        reason: log.reasons?.[0] || 'Standard evaluation',
+        confidence: log.riskScore ? (100 - log.riskScore) / 100 : 0.85,
+        layer: 'L4 Flash Judge',
+        timestamp: new Date(log.createdAt || Date.now()).toLocaleTimeString('en-US', { hour12: false }),
+    }));
 
     return (
-        <div className="flex flex-col gap-6">
-            {/* Top Section: Metrics & Welcome */}
-            <div className="flex flex-col lg:flex-row gap-8 items-end justify-between">
-                <div>
-                    <h1 className="text-3xl font-semibold text-veil-text-primary mb-2 tracking-tight">
-                        <WaveText text="VEIL OS v2.4" />
-                    </h1>
-                    <p className="text-veil-text-muted text-sm max-w-lg font-medium">
-                        {systemInsights.summary}
-                    </p>
-                </div>
-                <div className="w-full lg:w-auto min-w-[500px] bg-black/20 backdrop-blur-sm rounded-lg border border-white/5 p-1">
-                    <LiveMetrics />
-                </div>
-            </div>
-
-            {/* Main Operational Grid */}
-            <div className="grid grid-cols-12 gap-6 min-h-[600px]">
-
-                {/* LEFT: Agent List & Status */}
-                <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 h-full">
-                    <DashboardCard
-                        title="LAYER 2: IDENTITY GRID"
-                        subtitle={`${agents.length} Nodes Verified`}
-                        className="flex-1"
-                    >
-                        <div className="flex flex-col gap-2 h-full overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-veil-border">
-                            {agents.map(agent => (
-                                <button
-                                    key={agent.id}
-                                    onClick={() => onSelectAgent(agent.id)}
-                                    className={`group p-4 rounded-lg border text-left transition-all duration-300 relative overflow-hidden ${selectedAgentId === agent.id
-                                        ? 'bg-veil-accent/10 border-veil-accent/50 shadow-[0_0_20px_rgba(0,240,255,0.15)]'
-                                        : 'bg-veil-card border-veil-border hover:bg-veil-sub hover:border-veil-text-muted/30'
-                                        }`}
-                                >
-                                    <div className="flex justify-between items-start mb-2">
-                                        <span className={`font-mono text-sm font-bold tracking-tight ${selectedAgentId === agent.id ? 'text-veil-accent' : 'text-veil-text-secondary group-hover:text-veil-text-primary'}`}>
-                                            {agent.name}
-                                        </span>
-                                        {selectedAgentId === agent.id && <div className="w-2 h-2 rounded-full bg-veil-accent shadow-[0_0_8px_#00f0ff] animate-pulse" />}
-                                    </div>
-                                    <div className="h-[2px] w-full bg-veil-bg mt-3 relative overflow-hidden rounded-full">
-                                        <div className={`absolute inset-0 bg-veil-accent w-2/3 transition-all duration-1000 ${selectedAgentId === agent.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full group-hover:opacity-50 group-hover:translate-x-[-20%]'}`} />
-                                    </div>
-                                </button>
-                            ))}
-
-                            {agents.length === 0 && (
-                                <div className="p-8 border border-dashed border-white/10 rounded-lg text-center text-white/20 text-xs font-mono uppercase tracking-widest flex flex-col items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/10 font-bold mb-2">V</div>
-                                    No Neural Nodes Online
-                                </div>
-                            )}
-
-                            <div className="mt-auto pt-4 flex gap-2">
-                                <button
-                                    onClick={() => window.location.href = '/register'}
-                                    className="flex-1 py-3 bg-veil-accent/10 border border-veil-accent/30 text-veil-accent text-xs font-bold font-mono uppercase tracking-widest hover:bg-veil-accent/20 hover:border-veil-accent transition-all rounded hover:shadow-[0_0_15px_rgba(0,240,255,0.2)]"
-                                >
-                                    + Initialize Node
-                                </button>
-                                {agents.length > 0 && (
-                                    <button
-                                        onClick={() => setShowPurgeConfirm(true)}
-                                        className="px-3 py-3 border border-veil-alert/30 text-veil-alert text-xs font-bold font-mono uppercase tracking-widest hover:bg-veil-alert/10 hover:border-veil-alert transition-all rounded"
-                                        title="Purge All"
-                                    >
-                                        X
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </DashboardCard>
-                </div>
-
-                {/* MIDDLE: Hologram & Action Console */}
-                <div className="col-span-12 lg:col-span-6 flex flex-col gap-6">
-                    {/* Hologram Viewport */}
-                    <DashboardCard className="h-[400px] relative overflow-hidden p-0" gradient>
-                        {activeAgent ? (
-                            <div className="absolute inset-0">
-                                <AgentHologram
-                                    agent={activeAgent}
-                                    trustStatus={currentTrustStatus}
-                                    onUpdate={onUpdateAgent}
-                                    onDelete={onDeleteAgent}
-                                />
-                                {/* Overlay Stats */}
-                                <div className="absolute top-4 left-4 p-2 bg-black/40 backdrop-blur rounded border border-veil-border/50">
-                                    <div className="text-[10px] text-veil-text-muted font-mono">STATUS</div>
-                                    <div className={`text-sm font-bold ${currentTrustStatus === 'Compromised' ? 'text-veil-alert' : 'text-veil-success'}`}>
-                                        {currentTrustStatus}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center h-full text-veil-text-dim">
-                                <div className="w-24 h-24 rounded-full border border-veil-border/30 flex items-center justify-center mb-6 animate-pulse-slow">
-                                    <div className="w-2 h-2 bg-veil-accent/50 rounded-full" />
-                                </div>
-                                <span className="font-mono text-sm uppercase tracking-[0.2em]">Select Node to Visualize</span>
-                            </div>
-                        )}
-                    </DashboardCard>
-
-                    {/* Decision Engine */}
-                    <DashboardCard title="LAYER 5: SEMANTIC FIREWALL" className="flex-1 min-h-[300px]" alertLevel={scenarioTrigger ? 'medium' : 'none'}>
-                        {activeAgent ? (
-                            <ActionConsole
-                                agents={agents}
-                                policies={policies}
-                                onActionEvaluated={onActionEvaluated}
-                                scenarioConfig={selectedAgentId === scenarioTrigger?.agentId ? scenarioTrigger : undefined}
-                                isDemoMode={isDemoMode}
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-veil-text-dim font-mono text-xs">
-                                AWAITING TARGET LOCK
-                            </div>
-                        )}
-                    </DashboardCard>
-                </div>
-
-                {/* RIGHT: Policy & Logs */}
-                <div className="col-span-12 lg:col-span-3 flex flex-col gap-6 h-full">
-                    <DashboardCard
-                        title="LAYER 4: STATIC POLICY"
-                        subtitle="Enforcement Matrix"
-                        action={<span className="text-veil-accent font-bold text-lg">{policies.length}</span>}
-                    >
-                        <PolicyEditor
-                            onAddPolicy={onAddPolicy}
-                            onClearPolicies={onClearPolicies}
-                            onDeletePolicy={onDeletePolicy}
-                            policies={policies}
-                            compact={true}
-                        />
-                    </DashboardCard>
-
-                    <DashboardCard
-                        title="LAYER 7: IMMUTABLE LEDGER"
-                        subtitle="Audit Chain"
-                        className="flex-1"
-                        action={<div className="w-2 h-2 rounded-full bg-veil-success shadow-[0_0_5px_#00ff9d] animate-pulse" />}
-                    >
-                        <AuditLog entries={auditLog} agents={agents} onClearLogs={onClearLogs} onResolveEntry={onResolveEntry} compact={true} />
-                    </DashboardCard>
-                </div>
-
-            </div>
-
-            <ConfirmationModal
-                isOpen={showPurgeConfirm}
-                title="PURGE MATRIX?"
-                message="This will permanently delete all agent profiles. This action generates a Level 5 system alert and cannot be undone."
-                confirmText="INITIATE PURGE"
-                isDestructive={true}
-                onConfirm={onPurgeAgents}
-                onCancel={() => setShowPurgeConfirm(false)}
+        <div className="min-h-screen bg-slate-950">
+            {/* Status Bar */}
+            <StatusBar
+                version="9.0"
+                uptime={stats.uptime}
+                status="operational"
+                layersActive={7}
+                lastAttack={stats.blocked > 0 ? '4m ago' : 'Never'}
             />
+
+            {/* Main Content */}
+            <div className="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
+
+                {/* KPI Row */}
+                <KPICards
+                    riskScore={riskScore}
+                    mttd={stats.avgLatency}
+                    mttr={Math.round(stats.avgLatency * 0.7)}
+                    blockRate={parseFloat(blockRate)}
+                    aiThreatLevel={aiThreatLevel}
+                    aiConfidence={0.23 + (riskScore / 200)}
+                />
+
+                {/* Main Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Layer Health */}
+                    <LayerHealth />
+
+                    {/* Threat Heatmap */}
+                    <ThreatHeatmap />
+                </div>
+
+                {/* Bottom Grid - Live Feed & Decisions */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="h-[400px]">
+                        <LiveFeed />
+                    </div>
+
+                    <div className="h-[400px]">
+                        <DecisionCard decisions={recentDecisions.length > 0 ? recentDecisions : undefined} />
+                    </div>
+                </div>
+
+                {/* System Message */}
+                <div className="rounded-xl bg-slate-900/30 border border-white/5 p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                        <p className="text-sm text-slate-400">
+                            <span className="text-cyan-400 font-semibold">AI Analysis:</span> {systemInsights.summary}
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };

@@ -99,7 +99,8 @@ function AppContent() {
   const navigate = useNavigate();
 
   // --- CORE STATE ---
-  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('veil_token'));
+  // TEMP: Auto-authenticate for development (login files preserved for later)
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
@@ -383,7 +384,7 @@ function AppContent() {
               isInsightsLoading={isInsightsLoading}
             />
           </DashboardLayout>
-        ) : <LandingPage onStart={() => navigate('/login')} />
+        ) : <LandingPage onStart={() => setIsAuthenticated(true)} />
       } />
 
       <Route path="/register" element={
