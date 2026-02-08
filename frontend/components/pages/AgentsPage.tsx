@@ -80,7 +80,7 @@ const AgentsPage: React.FC<AgentsPageProps> = ({ agents, onUpdateAgent, onDelete
                                                 {agent.name}
                                             </div>
                                             <div className="text-[10px] text-white/40 font-mono tracking-wider uppercase">
-                                                ID: {agent.id.substring(0, 8)}...
+                                                ID: {(agent.id || 'unknown').substring(0, 8)}...
                                             </div>
                                         </div>
                                     </div>

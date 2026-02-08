@@ -10,13 +10,13 @@ import {
     Activity,
     Search,
     Bell,
-    User,
     ChevronRight,
     ChevronDown,
     Mail,
     FileText,
     Star,
-    Moon
+    Moon,
+    User
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -91,7 +91,7 @@ const Sidebar = () => {
                     active={location.pathname === '/'}
                 />
 
-                <NavItem icon={Activity} label="Monitoring" href="/monitoring" active={location.pathname === '/monitoring'} />
+                <NavItem icon={User} label="Agents" href="/agents" active={location.pathname === '/agents'} />
                 <NavItem icon={Shield} label="Policies" href="/policies" active={location.pathname === '/policies'} badge={3} />
                 <NavItem icon={Database} label="Audit Ledger" href="/logs" active={location.pathname === '/logs'} />
 
@@ -123,40 +123,93 @@ const Sidebar = () => {
 };
 
 // --- Top Header ---
-const Header = () => (
-    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40">
-        {/* Search */}
-        <div className="flex items-center relative w-80">
-            <Search className="w-4 h-4 absolute left-3 text-slate-400" />
-            <input
-                type="text"
-                placeholder="Search agents, policies, logs..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 transition-all"
-            />
-        </div>
+const Header = ({ headerProps }: { headerProps?: any }) => {
+    return (
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40">
+            {/* Search */}
+            <div className="flex items-center relative w-80">
+                <Search className="w-4 h-4 absolute left-3 text-slate-400" />
+                <input
+                    type="text"
+                    placeholder="Search agents, policies, logs..."
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 transition-all"
+                />
+            </div>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-                <Moon className="w-5 h-5 text-slate-500" />
-            </button>
-            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative">
-                <Bell className="w-5 h-5 text-slate-500" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full" />
-            </button>
-            <div className="h-6 w-px bg-slate-200" />
-            <div className="flex items-center gap-3">
-                <div className="text-right">
-                    <div className="text-sm font-medium text-slate-700">Admin</div>
-                    <div className="text-[10px] text-slate-400">SecOps</div>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center ring-2 ring-cyan-100">
-                    <User className="w-5 h-5 text-white" />
+            {/* Right Actions */}
+            <div className="flex items-center gap-4">
+                {headerProps && (
+                    <div className="flex items-center gap-2 mr-4 border-r border-slate-200 pr-4">
+                        <button
+                            onClick={headerProps.toggleDemo}
+                            className={cn(
+                                "text-xs font-bold px-3 py-1.5 rounded-lg border transition-all uppercase tracking-wider",
+                                headerProps.isDemoMode
+                                    ? "bg-cyan-50 border-cyan-200 text-cyan-700"
+                                    : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                            )}
+                        >
+                            Demo: {headerProps.isDemoMode ? 'ON' : 'OFF'}
+                        </button>
+
+                        {headerProps.isDemoMode && (
+                            <button
+                                onClick={headerProps.runSimulation}
+                                disabled={headerProps.simulationStep !== null}
+                                className={cn(
+                                    "text-xs font-bold px-3 py-1.5 rounded-lg border transition-all uppercase tracking-wider flex items-center gap-2",
+                                    headerProps.simulationStep !== null
+                                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                        : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
+                                )}
+                            >
+                                {headerProps.simulationStep !== null ? (
+                                    <>
+                                        <Activity className="w-3 h-3 animate-spin" />
+                                        Running...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Activity className="w-3 h-3" />
+                                        Simulate Attack
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                    <Moon className="w-5 h-5 text-slate-500" />
+                </button>
+                <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative">
+                    <Bell className="w-5 h-5 text-slate-500" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full" />
+                </button>
+                <div className="h-6 w-px bg-slate-200" />
+                <div className="flex items-center gap-3">
+                    <div className="text-right">
+                        <div className="text-sm font-medium text-slate-700">Admin</div>
+                        <div className="text-[10px] text-slate-400">SecOps</div>
+                    </div>
+                    {headerProps?.onLogout ? (
+                        <button
+                            onClick={headerProps.onLogout}
+                            className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center ring-2 ring-cyan-100 hover:ring-4 transition-all"
+                            title="Logout"
+                        >
+                            <User className="w-5 h-5 text-white" />
+                        </button>
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center ring-2 ring-cyan-100">
+                            <User className="w-5 h-5 text-white" />
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
-    </header>
-);
+        </header>
+    );
+};
 
 // --- Main Layout ---
 interface LayoutProps {
@@ -166,12 +219,12 @@ interface LayoutProps {
     systemRisk?: string;
 }
 
-const DashboardLayout: React.FC<LayoutProps> = ({ children }) => {
+const DashboardLayout: React.FC<LayoutProps> = ({ children, headerProps }) => {
     return (
         <div className="flex min-h-screen bg-slate-100 text-slate-900 font-sans">
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0">
-                <Header />
+                <Header headerProps={headerProps} />
                 <main className="flex-1 p-6 overflow-y-auto">
                     <div className="max-w-[1600px] mx-auto">
                         {children}
