@@ -1,145 +1,381 @@
-import React, { useState, useEffect } from 'react';
-import StatusBar from './dashboard/StatusBar';
-import KPICards from './dashboard/KPICards';
-import LayerHealth from './dashboard/LayerHealth';
-import ThreatHeatmap from './dashboard/ThreatHeatmap';
-import LiveFeed from './dashboard/LiveFeed';
-import DecisionCard from './dashboard/DecisionCard';
+import React, { useEffect, useState } from 'react';
+import {
+    Shield,
+    Users,
+    FileText,
+    AlertTriangle,
+    CheckCircle,
+    Clock,
+    Activity,
+    RefreshCw,
+    TrendingUp,
+    XCircle
+} from 'lucide-react';
+import { cn } from '../lib/utils';
 
-interface DashboardPageProps {
-    agents?: any[];
-    policies?: any[];
-    auditLog?: any[];
-    selectedAgentId?: string | null;
-    onSelectAgent?: (id: string) => void;
-    onUpdateAgent?: (agent: any) => void;
-    onDeleteAgent?: (id: string) => void;
-    onAddPolicy?: (policy: any) => void;
-    onDeletePolicy?: (id: string) => void;
-    onClearPolicies?: () => void;
-    onClearLogs?: () => void;
-    onResolveEntry?: (id: string, resolution: any) => void;
-    onActionEvaluated?: (action: any, evaluation: any) => void;
-    onPurgeAgents?: () => void;
-    scenarioTrigger?: any;
-    isDemoMode?: boolean;
-    systemInsights?: { summary: string; riskTrend: string; criticalAlerts: string[] };
-    isInsightsLoading?: boolean;
+// API Base URL
+const API_BASE = '/api';
+
+// --- Types ---
+interface Agent {
+    id: string;
+    name: string;
+    purpose: string;
+    riskLevel: string;
+    createdAt: string;
 }
 
-const DashboardPage: React.FC<DashboardPageProps> = ({
-    auditLog = [],
-    systemInsights = { summary: 'System operational. No anomalies detected.', riskTrend: 'stable', criticalAlerts: [] },
-}) => {
-    const [stats, setStats] = useState({
-        totalRequests: 0,
-        allowed: 0,
-        blocked: 0,
-        avgLatency: 12,
-        uptime: '0h 0m',
-    });
+interface Policy {
+    id: string;
+    name: string;
+    naturalLanguage: string;
+    createdAt: string;
+}
 
-    // Fetch backend stats
-    useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const res = await fetch('/api/v1/stats');
-                if (res.ok) {
-                    const data = await res.json();
-                    setStats({
-                        totalRequests: (data.allowed || 0) + (data.blocked || 0),
-                        allowed: data.allowed || 0,
-                        blocked: data.blocked || 0,
-                        avgLatency: data.avgLatency || 12,
-                        uptime: data.uptime || '23h 17m',
-                    });
-                }
-            } catch (err) {
-                console.error('Stats fetch failed:', err);
+interface LogEntry {
+    id: string;
+    actionType: string;
+    actionContent: string;
+    decision: string;
+    riskScore: number;
+    createdAt: string;
+}
+
+interface Stats {
+    total_requests: number;
+    allowed_count: number;
+    blocked_count: number;
+    recent_logs: { path: string; status: number; latency: number; timestamp: number }[];
+}
+
+interface Insights {
+    summary: string;
+    riskTrend: string;
+    criticalAlerts: string[];
+}
+
+// --- API Hook ---
+function useApi<T>(endpoint: string, defaultValue: T): { data: T; loading: boolean; refetch: () => void } {
+    const [data, setData] = useState<T>(defaultValue);
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const res = await fetch(`${API_BASE}${endpoint}`);
+            if (res.ok) {
+                const json = await res.json();
+                setData(json);
             }
-        };
+        } catch (err) {
+            console.error(`Failed to fetch ${endpoint}:`, err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchStats();
-        const interval = setInterval(fetchStats, 5000);
+    useEffect(() => {
+        fetchData();
+        const interval = setInterval(fetchData, 10000);
         return () => clearInterval(interval);
-    }, []);
+    }, [endpoint]);
 
-    // Calculate metrics
-    const blockRate = stats.totalRequests > 0
-        ? ((stats.blocked / stats.totalRequests) * 100).toFixed(1)
-        : '0.0';
+    return { data, loading, refetch: fetchData };
+}
 
-    const riskScore = Math.min(Math.round(parseFloat(blockRate) * 5 + (systemInsights.criticalAlerts?.length || 0) * 10), 100);
-
-    const aiThreatLevel = riskScore < 20 ? 'minimal'
-        : riskScore < 40 ? 'low'
-            : riskScore < 70 ? 'moderate'
-                : 'high';
-
-    // Transform audit log to decisions
-    const recentDecisions = auditLog.slice(0, 5).map((log: any, i: number) => ({
-        id: log.id || `dec-${i}`,
-        verdict: log.decision === 'allow' ? 'allow' as const : 'block' as const,
-        payload: log.actionContent || 'Unknown action',
-        reason: log.reasons?.[0] || 'Standard evaluation',
-        confidence: log.riskScore ? (100 - log.riskScore) / 100 : 0.85,
-        layer: 'L4 Flash Judge',
-        timestamp: new Date(log.createdAt || Date.now()).toLocaleTimeString('en-US', { hour12: false }),
-    }));
+// --- Security Status Card ---
+const SecurityStatusCard = ({ stats, insights }: { stats: Stats; insights: Insights }) => {
+    const blockRate = stats.total_requests > 0
+        ? ((stats.blocked_count / stats.total_requests) * 100).toFixed(1)
+        : '0';
+    const isHealthy = parseFloat(blockRate) < 10;
 
     return (
-        <div className="min-h-screen bg-slate-950">
-            {/* Status Bar */}
-            <StatusBar
-                version="9.0"
-                uptime={stats.uptime}
-                status="operational"
-                layersActive={7}
-                lastAttack={stats.blocked > 0 ? '4m ago' : 'Never'}
-            />
+        <div className={cn(
+            "rounded-xl p-6 text-white relative overflow-hidden",
+            isHealthy
+                ? "bg-gradient-to-br from-cyan-600 via-teal-600 to-emerald-600"
+                : "bg-gradient-to-br from-amber-500 via-orange-500 to-rose-500"
+        )}>
+            <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                    <Shield className="w-5 h-5" />
+                    <span className="text-sm font-medium text-white/80">VEIL Security Status</span>
+                </div>
+                <h2 className="text-2xl font-bold mb-2">
+                    {isHealthy ? 'All Systems Secure' : 'Elevated Threat Activity'}
+                </h2>
+                <p className="text-white/70 text-sm mb-4">{insights.summary}</p>
 
-            {/* Main Content */}
-            <div className="max-w-[1800px] mx-auto px-6 py-6 space-y-6">
-
-                {/* KPI Row */}
-                <KPICards
-                    riskScore={riskScore}
-                    mttd={stats.avgLatency}
-                    mttr={Math.round(stats.avgLatency * 0.7)}
-                    blockRate={parseFloat(blockRate)}
-                    aiThreatLevel={aiThreatLevel}
-                    aiConfidence={0.23 + (riskScore / 200)}
-                />
-
-                {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Layer Health */}
-                    <LayerHealth />
-
-                    {/* Threat Heatmap */}
-                    <ThreatHeatmap />
+                <div className="flex items-baseline gap-3">
+                    <span className="text-4xl font-bold">{stats.total_requests.toLocaleString()}</span>
+                    <span className="text-white/70 text-sm">requests processed</span>
                 </div>
 
-                {/* Bottom Grid - Live Feed & Decisions */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="h-[400px]">
-                        <LiveFeed />
-                    </div>
-
-                    <div className="h-[400px]">
-                        <DecisionCard decisions={recentDecisions.length > 0 ? recentDecisions : undefined} />
-                    </div>
+                <div className="flex items-center gap-3 mt-4">
+                    <span className={cn(
+                        "px-3 py-1.5 rounded-full text-xs font-semibold",
+                        insights.riskTrend === 'stable' ? "bg-white/20" : "bg-rose-500/50"
+                    )}>
+                        {insights.riskTrend === 'stable' ? '● Stable' : '⚠ Elevated'}
+                    </span>
                 </div>
+            </div>
 
-                {/* System Message */}
-                <div className="rounded-xl bg-slate-900/30 border border-white/5 p-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                        <p className="text-sm text-slate-400">
-                            <span className="text-cyan-400 font-semibold">AI Analysis:</span> {systemInsights.summary}
-                        </p>
+            {/* Background decoration */}
+            <div className="absolute -right-8 -bottom-8 opacity-10">
+                <Shield className="w-48 h-48" />
+            </div>
+        </div>
+    );
+};
+
+// --- KPI Cards ---
+const KPICards = ({ stats, agents, policies }: { stats: Stats; agents: Agent[]; policies: Policy[] }) => {
+    const kpis = [
+        {
+            label: 'Allowed',
+            value: stats.allowed_count.toLocaleString(),
+            icon: CheckCircle,
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50',
+            border: 'border-emerald-100'
+        },
+        {
+            label: 'Blocked',
+            value: stats.blocked_count.toLocaleString(),
+            icon: XCircle,
+            color: 'text-rose-600',
+            bg: 'bg-rose-50',
+            border: 'border-rose-100'
+        },
+        {
+            label: 'Agents',
+            value: agents.length.toString(),
+            icon: Users,
+            color: 'text-cyan-600',
+            bg: 'bg-cyan-50',
+            border: 'border-cyan-100'
+        },
+        {
+            label: 'Policies',
+            value: policies.length.toString(),
+            icon: FileText,
+            color: 'text-teal-600',
+            bg: 'bg-teal-50',
+            border: 'border-teal-100'
+        },
+    ];
+
+    return (
+        <div className="grid grid-cols-4 gap-4">
+            {kpis.map((kpi, i) => (
+                <div key={i} className={cn("bg-white rounded-xl p-5 border shadow-sm", kpi.border)}>
+                    <div className="flex items-center justify-between mb-3">
+                        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", kpi.bg)}>
+                            <kpi.icon className={cn("w-5 h-5", kpi.color)} />
+                        </div>
+                        <TrendingUp className="w-4 h-4 text-slate-300" />
                     </div>
+                    <div className="text-2xl font-bold text-slate-800">{kpi.value}</div>
+                    <div className="text-sm text-slate-500">{kpi.label}</div>
                 </div>
+            ))}
+        </div>
+    );
+};
+
+// --- Recent Activity ---
+const RecentActivity = ({ logs }: { logs: LogEntry[] }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100 h-full">
+        <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-cyan-600" />
+                <h3 className="font-semibold text-slate-800">Security Events</h3>
+            </div>
+            <span className="text-xs text-slate-400">Live</span>
+        </div>
+
+        <div className="p-4">
+            {logs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-slate-400">
+                    <Clock className="w-10 h-10 mb-3 text-slate-300" />
+                    <p className="text-sm font-medium">No events yet</p>
+                    <p className="text-xs text-slate-400 mt-1">Process requests to see activity</p>
+                </div>
+            ) : (
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {logs.map((log, i) => (
+                        <div key={log.id || i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-50">
+                            <div className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0",
+                                log.decision === 'allow' ? 'bg-emerald-100' :
+                                    log.decision === 'deny' ? 'bg-rose-100' : 'bg-amber-100'
+                            )}>
+                                {log.decision === 'allow' ? (
+                                    <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                ) : log.decision === 'deny' ? (
+                                    <XCircle className="w-4 h-4 text-rose-600" />
+                                ) : (
+                                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className={cn(
+                                        "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                                        log.decision === 'allow' ? 'bg-emerald-100 text-emerald-700' :
+                                            log.decision === 'deny' ? 'bg-rose-100 text-rose-700' :
+                                                'bg-amber-100 text-amber-700'
+                                    )}>
+                                        {log.decision}
+                                    </span>
+                                    <span className="text-xs text-slate-400">{log.actionType}</span>
+                                </div>
+                                <p className="text-sm text-slate-600 truncate">{log.actionContent}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+// --- Agents List ---
+const AgentsList = ({ agents }: { agents: Agent[] }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+        <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-cyan-600" />
+                <h3 className="font-semibold text-slate-800">Registered Agents</h3>
+            </div>
+            <span className="text-xs px-2 py-1 rounded-full bg-cyan-50 text-cyan-600 font-medium">{agents.length}</span>
+        </div>
+
+        <div className="p-4">
+            {agents.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-slate-400">
+                    <Users className="w-10 h-10 mb-3 text-slate-300" />
+                    <p className="text-sm">No agents registered</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {agents.slice(0, 5).map((agent) => (
+                        <div key={agent.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 border border-slate-50">
+                            <div className={cn(
+                                "w-10 h-10 rounded-lg flex items-center justify-center text-lg",
+                                agent.riskLevel === 'high' ? 'bg-rose-100' :
+                                    agent.riskLevel === 'medium' ? 'bg-amber-100' : 'bg-emerald-100'
+                            )}>
+                                🤖
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="font-medium text-slate-800 truncate">{agent.name}</div>
+                                <div className="text-xs text-slate-500 truncate">{agent.purpose}</div>
+                            </div>
+                            <span className={cn(
+                                "px-2 py-1 rounded text-[10px] font-bold uppercase shrink-0",
+                                agent.riskLevel === 'high' ? 'bg-rose-100 text-rose-700' :
+                                    agent.riskLevel === 'medium' ? 'bg-amber-100 text-amber-700' :
+                                        'bg-emerald-100 text-emerald-700'
+                            )}>
+                                {agent.riskLevel}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+// --- Policies List ---
+const PoliciesList = ({ policies }: { policies: Policy[] }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-slate-100">
+        <div className="flex items-center justify-between p-5 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-teal-600" />
+                <h3 className="font-semibold text-slate-800">Policies</h3>
+            </div>
+            <span className="text-xs px-2 py-1 rounded-full bg-teal-50 text-teal-600 font-medium">{policies.length}</span>
+        </div>
+
+        <div className="p-4">
+            {policies.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-32 text-slate-400">
+                    <FileText className="w-10 h-10 mb-3 text-slate-300" />
+                    <p className="text-sm">No policies defined</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {policies.slice(0, 4).map((policy) => (
+                        <div key={policy.id} className="p-3 rounded-lg border border-teal-100 bg-teal-50/30 hover:bg-teal-50">
+                            <div className="font-medium text-slate-800 text-sm mb-1">{policy.name}</div>
+                            <div className="text-xs text-slate-500 line-clamp-2">{policy.naturalLanguage}</div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+// --- Main Dashboard ---
+interface DashboardPageProps {
+    isDemoMode?: boolean;
+    [key: string]: any;
+}
+
+const DashboardPage: React.FC<DashboardPageProps> = () => {
+    const { data: agents, loading: agentsLoading } = useApi<Agent[]>('/agents', []);
+    const { data: policies, loading: policiesLoading } = useApi<Policy[]>('/policies', []);
+    const { data: logs, loading: logsLoading } = useApi<LogEntry[]>('/logs', []);
+    const { data: insights } = useApi<Insights>('/insights', { summary: 'Connecting to VEIL...', riskTrend: 'stable', criticalAlerts: [] });
+    const { data: stats } = useApi<Stats>('/v1/stats', { total_requests: 0, allowed_count: 0, blocked_count: 0, recent_logs: [] });
+
+    const isLoading = agentsLoading || policiesLoading || logsLoading;
+
+    return (
+        <div className="space-y-6">
+            {/* Loading */}
+            {isLoading && (
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Syncing with VEIL backend...</span>
+                </div>
+            )}
+
+            {/* Top: Status + KPIs */}
+            <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-4">
+                    <SecurityStatusCard stats={stats} insights={insights} />
+                </div>
+                <div className="col-span-12 lg:col-span-8">
+                    <KPICards stats={stats} agents={agents} policies={policies} />
+                </div>
+            </div>
+
+            {/* Middle: Activity + Agents + Policies */}
+            <div className="grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-5">
+                    <RecentActivity logs={logs} />
+                </div>
+                <div className="col-span-12 lg:col-span-4">
+                    <AgentsList agents={agents} />
+                </div>
+                <div className="col-span-12 lg:col-span-3">
+                    <PoliciesList policies={policies} />
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                <span>VEIL Security OS v8.0</span>
+                <span className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    Auto-refresh: 10s
+                </span>
             </div>
         </div>
     );

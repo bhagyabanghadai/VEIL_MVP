@@ -1,60 +1,179 @@
-import React from 'react';
-import Sidebar from '../dashboard/Sidebar';
-import CommandBar from '../dashboard/CommandBar';
-import NeuralNetworkBackground from '../NeuralNetworkBackground';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Link, useLocation } from 'react-router-dom';
+import {
+    LayoutDashboard,
+    Shield,
+    Database,
+    Terminal,
+    Settings,
+    Activity,
+    Search,
+    Bell,
+    User,
+    ChevronRight,
+    ChevronDown,
+    Mail,
+    FileText,
+    Star,
+    Moon
+} from 'lucide-react';
+import { cn } from '../../lib/utils';
 
-import { Navigate } from 'react-router-dom';
+// --- Sidebar Navigation Item ---
+const NavItem = ({ icon: Icon, label, href, active, badge, hasSubmenu, isOpen, onClick }: any) => (
+    <div>
+        <Link
+            to={href || '#'}
+            onClick={onClick}
+            className={cn(
+                "flex items-center justify-between px-4 py-2.5 rounded-lg transition-all duration-200 group",
+                active
+                    ? "bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg shadow-cyan-500/20"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+            )}
+        >
+            <div className="flex items-center gap-3">
+                <Icon className={cn("w-5 h-5", active ? "text-white" : "text-slate-500 group-hover:text-slate-300")} />
+                <span className="text-sm font-medium">{label}</span>
+            </div>
+            <div className="flex items-center gap-2">
+                {badge && (
+                    <span className={cn(
+                        "px-2 py-0.5 rounded-full text-[10px] font-bold",
+                        typeof badge === 'number' ? "bg-cyan-500/20 text-cyan-400" :
+                            badge === 'Pro' ? "bg-teal-500/20 text-teal-400" :
+                                badge === 'New' ? "bg-emerald-500/20 text-emerald-400" :
+                                    "bg-amber-500/20 text-amber-400"
+                    )}>
+                        {badge}
+                    </span>
+                )}
+                {hasSubmenu && (
+                    isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />
+                )}
+            </div>
+        </Link>
+    </div>
+);
 
-interface DashboardLayoutProps {
-    children: React.ReactNode;
-    isAuthenticated: boolean;
-    headerProps: any; // Using the existing props structure for compatibility
-    systemRisk?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}
+// --- Security-Themed Sidebar ---
+const Sidebar = () => {
+    const location = useLocation();
+    const [openMenus, setOpenMenus] = useState<string[]>(['dashboards']);
 
-import { FallingPattern } from '../ui/falling-pattern';
-
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-    children,
-    isAuthenticated,
-    headerProps,
-    systemRisk = 'LOW'
-}) => {
-    if (!isAuthenticated) {
-        return <Navigate to="/login" replace />;
-    }
+    const toggleMenu = (menu: string) => {
+        setOpenMenus(prev =>
+            prev.includes(menu) ? prev.filter(m => m !== menu) : [...prev, menu]
+        );
+    };
 
     return (
-        <div className="flex h-screen w-full bg-veil-bg overflow-hidden text-veil-text-primary font-sans selection:bg-veil-accent/30 relative">
-            <div className="absolute inset-0 z-0 pointer-events-none">
-                <FallingPattern
-                    color="#FFFFFF"
-                    backgroundColor="#050505"
-                    density={1.5}
-                />
+        <aside className="w-64 h-screen sticky top-0 bg-slate-900 border-r border-slate-800 flex flex-col">
+            {/* Logo */}
+            <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                    <span className="text-lg font-bold text-white">VEIL</span>
+                    <span className="text-[10px] text-slate-500 block -mt-1">Security OS</span>
+                </div>
             </div>
 
-            {/* Background Gradient Overlay to match Login Page */}
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/50 to-[#050505]/80 pointer-events-none z-0" />
-
-            {/* Sidebar Left */}
-            <Sidebar className="relative z-20" />
-
-            {/* Main Content Area */}
-            <div className="flex-1 flex flex-col relative z-10 h-full overflow-hidden">
-                {/* Top Command Bar */}
-                <CommandBar
-                    isDemoMode={headerProps.isDemoMode}
-                    toggleDemo={headerProps.toggleDemo}
-                    runSimulation={headerProps.runSimulation}
-                    simulationStep={headerProps.simulationStep}
-                    onLogout={headerProps.onLogout}
-                    systemRisk={systemRisk}
+            {/* Navigation */}
+            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {/* Dashboards Group */}
+                <NavItem
+                    icon={LayoutDashboard}
+                    label="Dashboard"
+                    href="/"
+                    active={location.pathname === '/'}
                 />
 
-                {/* Scrollable Workspace */}
-                <main className="flex-1 overflow-y-auto overflow-x-hidden p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                    <div className="max-w-[1600px] mx-auto pb-24">
+                <NavItem icon={Activity} label="Monitoring" href="/monitoring" active={location.pathname === '/monitoring'} />
+                <NavItem icon={Shield} label="Policies" href="/policies" active={location.pathname === '/policies'} badge={3} />
+                <NavItem icon={Database} label="Audit Ledger" href="/logs" active={location.pathname === '/logs'} />
+
+                {/* Divider */}
+                <div className="py-4">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 px-4 mb-2">
+                        Management
+                    </div>
+                </div>
+
+                <NavItem icon={Mail} label="Alerts" href="/alerts" badge="New" />
+                <NavItem icon={Terminal} label="Terminal" href="/terminal" />
+                <NavItem icon={FileText} label="Reports" href="/reports" />
+                <NavItem icon={Settings} label="Settings" href="/settings" active={location.pathname === '/settings'} />
+            </nav>
+
+            {/* Bottom Status */}
+            <div className="p-4 border-t border-slate-800">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <div className="flex-1">
+                        <div className="text-xs font-medium text-slate-300">System Online</div>
+                        <div className="text-[10px] text-slate-500">7 layers active</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    );
+};
+
+// --- Top Header ---
+const Header = () => (
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40">
+        {/* Search */}
+        <div className="flex items-center relative w-80">
+            <Search className="w-4 h-4 absolute left-3 text-slate-400" />
+            <input
+                type="text"
+                placeholder="Search agents, policies, logs..."
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-10 pr-4 text-sm text-slate-600 placeholder:text-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 transition-all"
+            />
+        </div>
+
+        {/* Right Actions */}
+        <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <Moon className="w-5 h-5 text-slate-500" />
+            </button>
+            <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative">
+                <Bell className="w-5 h-5 text-slate-500" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full" />
+            </button>
+            <div className="h-6 w-px bg-slate-200" />
+            <div className="flex items-center gap-3">
+                <div className="text-right">
+                    <div className="text-sm font-medium text-slate-700">Admin</div>
+                    <div className="text-[10px] text-slate-400">SecOps</div>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center ring-2 ring-cyan-100">
+                    <User className="w-5 h-5 text-white" />
+                </div>
+            </div>
+        </div>
+    </header>
+);
+
+// --- Main Layout ---
+interface LayoutProps {
+    children: React.ReactNode;
+    isAuthenticated?: boolean;
+    headerProps?: any;
+    systemRisk?: string;
+}
+
+const DashboardLayout: React.FC<LayoutProps> = ({ children }) => {
+    return (
+        <div className="flex min-h-screen bg-slate-100 text-slate-900 font-sans">
+            <Sidebar />
+            <div className="flex-1 flex flex-col min-w-0">
+                <Header />
+                <main className="flex-1 p-6 overflow-y-auto">
+                    <div className="max-w-[1600px] mx-auto">
                         {children}
                     </div>
                 </main>

@@ -1,59 +1,110 @@
 import React from 'react';
+import { Settings, Key, Cpu, Shield, ArrowLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const SettingsPage: React.FC = () => {
     return (
-        <div className="max-w-4xl mx-auto w-full py-12 space-y-12">
-            <header>
-                <h1 className="text-hero text-[48px] mb-4">Command Config.</h1>
-                <p className="text-white/40 text-[16px]">Manage protocol parameters and administrator credentials.</p>
-            </header>
+        <div className="max-w-4xl mx-auto py-8 space-y-8">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">Settings</h1>
+                    <p className="text-slate-500 text-sm mt-1">Manage system configuration and credentials</p>
+                </div>
+                <Link
+                    to="/"
+                    className="flex items-center gap-2 text-sm text-slate-500 hover:text-cyan-600 transition-colors"
+                >
+                    <ArrowLeft className="w-4 h-4" />
+                    Back to Dashboard
+                </Link>
+            </div>
 
-            <div className="glass-panel p-12 animate-luxe">
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="w-1.5 h-1.5 bg-[#00f0ff] rounded-full shadow-[0_0_8px_#00f0ff]"></div>
-                        <h3 className="text-label text-[#00f0ff] text-[12px]">Admin Credentials</h3>
+            {/* Admin Credentials Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-100 flex items-center justify-center">
+                        <Key className="w-4 h-4 text-cyan-600" />
+                    </div>
+                    <h3 className="font-semibold text-slate-800">Admin Credentials</h3>
+                </div>
+
+                <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Operator ID</label>
+                            <input
+                                type="text"
+                                value="veil_admin"
+                                disabled
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-600 cursor-not-allowed"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Current Password</label>
+                            <input
+                                type="password"
+                                value="********"
+                                disabled
+                                className="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-slate-600 cursor-not-allowed"
+                            />
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-3">
-                            <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Operator ID</label>
-                            <input type="text" value="veil_admin" disabled className="w-full bg-black/40 border border-white/10 p-4 text-white/60 text-[14px] cursor-not-allowed" />
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Current Password</label>
-                            <input type="password" value="********" disabled className="w-full bg-black/40 border border-white/10 p-4 text-white/60 text-[14px] cursor-not-allowed" />
-                        </div>
-                    </div>
+                    <button className="px-6 py-2.5 bg-cyan-600 text-white rounded-lg font-medium text-sm hover:bg-cyan-700 transition-colors">
+                        Rotate Security Keys
+                    </button>
+                </div>
+            </div>
 
-                    <div className="pt-6">
-                        <button className="neon-button text-[11px]">Rotate Security Keys</button>
+            {/* API Integration Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
+                        <Cpu className="w-4 h-4 text-teal-600" />
+                    </div>
+                    <h3 className="font-semibold text-slate-800">API Integration</h3>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Gemini API Key</label>
+                        <div className="flex gap-3">
+                            <input
+                                type="password"
+                                value="AIzaSy...XyZ"
+                                disabled
+                                className="flex-1 bg-slate-50 border border-slate-200 rounded-lg p-3 font-mono text-slate-600 tracking-wider"
+                            />
+                            <button className="px-4 py-2 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors">
+                                Reveal
+                            </button>
+                        </div>
+                        <p className="text-sm text-slate-400">
+                            Linked to Project: <span className="text-slate-600 font-medium">Limitless_V99</span>
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <div className="glass-panel p-12 animate-luxe">
-                <div className="space-y-10">
-                    <div className="flex items-center gap-4 mb-2">
-                        <div className="w-1.5 h-1.5 bg-[#bd00ff] rounded-full shadow-[0_0_8px_#bd00ff]"></div>
-                        <h3 className="text-label text-[#bd00ff] text-[12px]">API Integration</h3>
+            {/* Security Status Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-emerald-600" />
                     </div>
+                    <h3 className="font-semibold text-slate-800">Security Status</h3>
+                </div>
 
-                    <div className="space-y-4">
-                        <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Gemini API Key</label>
-                        <div className="flex gap-4">
-                            <input type="password" value="AIzaSy...XyZ" disabled className="flex-1 bg-black/40 border border-white/10 p-4 text-white/60 text-[14px] font-mono tracking-widest" />
-                            <button className="px-6 border border-white/10 hover:bg-white/5 text-white/40 hover:text-white transition-colors uppercase text-[10px] font-bold tracking-widest">Reveal</button>
+                <div className="p-6">
+                    <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                        <div>
+                            <div className="text-sm font-medium text-emerald-800">All Systems Secure</div>
+                            <div className="text-xs text-emerald-600">7 security layers active</div>
                         </div>
-                        <p className="text-[12px] text-white/30 italic">Linked to Project: <span className="text-white/60">Limitless_V99</span></p>
                     </div>
                 </div>
-            </div>
-            <div className="text-center pt-12">
-                <a href="/" className="text-white/30 hover:text-white transition-colors text-[11px] uppercase tracking-[0.2em] font-bold flex items-center justify-center gap-2">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-                    Return to Dashboard
-                </a>
             </div>
         </div>
     );

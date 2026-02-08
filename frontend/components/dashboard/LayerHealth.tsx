@@ -1,83 +1,98 @@
 import React from 'react';
+import { ShieldCheck, AlertTriangle, XOctagon, Activity } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface Layer {
     id: string;
     name: string;
-    health: number;
     status: 'active' | 'degraded' | 'offline';
-    metric?: string;
+    health: number;
+    latency: string;
 }
 
-interface LayerHealthProps {
-    layers?: Layer[];
-}
+const LayerRow = ({ layer }: { layer: Layer }) => {
+    const statusConfig = {
+        active: {
+            icon: ShieldCheck,
+            color: 'text-emerald-400',
+            bg: 'bg-emerald-500/10',
+            border: 'border-emerald-500/20',
+            barColor: 'bg-gradient-to-r from-emerald-500 to-cyan-400'
+        },
+        degraded: {
+            icon: AlertTriangle,
+            color: 'text-amber-400',
+            bg: 'bg-amber-500/10',
+            border: 'border-amber-500/20',
+            barColor: 'bg-gradient-to-r from-amber-500 to-orange-400'
+        },
+        offline: {
+            icon: XOctagon,
+            color: 'text-rose-400',
+            bg: 'bg-rose-500/10',
+            border: 'border-rose-500/20',
+            barColor: 'bg-gradient-to-r from-rose-500 to-red-400'
+        },
+    }[layer.status];
 
-const defaultLayers: Layer[] = [
-    { id: 'L0', name: 'Proxy', health: 100, status: 'active', metric: 'Intercepting' },
-    { id: 'L1', name: 'Identity', health: 100, status: 'active', metric: '23 verified' },
-    { id: 'L2', name: 'Intent', health: 100, status: 'active', metric: '0 replay' },
-    { id: 'L3', name: 'Policy (OPA)', health: 98, status: 'active', metric: '4 rules' },
-    { id: 'L4', name: 'Judge (LLM)', health: 95, status: 'active', metric: '8ms avg' },
-    { id: 'L7', name: 'Ledger', health: 100, status: 'active', metric: '1,234 entries' },
-];
-
-const LayerHealth: React.FC<LayerHealthProps> = ({ layers = defaultLayers }) => {
-    const getHealthColor = (health: number) => {
-        if (health >= 95) return 'bg-emerald-500';
-        if (health >= 80) return 'bg-amber-500';
-        return 'bg-red-500';
-    };
-
-    const getStatusIcon = (status: string) => {
-        if (status === 'active') return '✓';
-        if (status === 'degraded') return '!';
-        return '×';
-    };
-
-    const getStatusColor = (status: string) => {
-        if (status === 'active') return 'text-emerald-400 bg-emerald-500/20';
-        if (status === 'degraded') return 'text-amber-400 bg-amber-500/20';
-        return 'text-red-400 bg-red-500/20';
-    };
+    const Icon = statusConfig.icon;
 
     return (
-        <div className="rounded-xl bg-slate-900/50 backdrop-blur-sm border border-white/5 overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/5">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                    Security Layer Health
-                </h3>
+        <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-all duration-200 border border-transparent hover:border-white/5">
+            <div className="flex items-center gap-3">
+                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center border", statusConfig.bg, statusConfig.border)}>
+                    <Icon className={cn("w-4 h-4", statusConfig.color)} />
+                </div>
+                <div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-white/30">{layer.id}</span>
+                        <span className="text-sm font-medium text-white">{layer.name}</span>
+                    </div>
+                </div>
             </div>
 
-            <div className="p-4 space-y-3">
-                {layers.map((layer) => (
-                    <div key={layer.id} className="group">
-                        <div className="flex items-center justify-between mb-1.5">
-                            <div className="flex items-center gap-2">
-                                <span className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold ${getStatusColor(layer.status)}`}>
-                                    {getStatusIcon(layer.status)}
-                                </span>
-                                <span className="text-xs font-mono text-slate-300">
-                                    <span className="text-slate-500">{layer.id}</span> {layer.name}
-                                </span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="text-[10px] text-slate-500 font-mono">
-                                    {layer.metric}
-                                </span>
-                                <span className="text-xs font-bold text-white">
-                                    {layer.health}%
-                                </span>
-                            </div>
-                        </div>
+            <div className="flex items-center gap-4">
+                {/* Health Bar */}
+                <div className="hidden sm:block w-24 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div
+                        className={cn("h-full rounded-full transition-all duration-500", statusConfig.barColor)}
+                        style={{ width: `${layer.health}%` }}
+                    />
+                </div>
+                {/* Latency */}
+                <div className="text-right min-w-[3.5rem]">
+                    <div className="text-xs font-mono text-white/50">{layer.latency}</div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
-                        {/* Health Bar */}
-                        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                                className={`h-full ${getHealthColor(layer.health)} transition-all duration-500 rounded-full`}
-                                style={{ width: `${layer.health}%` }}
-                            />
-                        </div>
-                    </div>
+const LayerHealth: React.FC = () => {
+    const layers: Layer[] = [
+        { id: 'L0', name: 'Smart Valve', status: 'active', health: 100, latency: '2ms' },
+        { id: 'L1', name: 'Firewall', status: 'active', health: 98, latency: '5ms' },
+        { id: 'L2', name: 'Rate Limiter', status: 'active', health: 95, latency: '3ms' },
+        { id: 'L3', name: 'Anomaly Detector', status: 'degraded', health: 78, latency: '12ms' },
+        { id: 'L4', name: 'AI Judge', status: 'active', health: 99, latency: '8ms' },
+        { id: 'L5', name: 'Ledger', status: 'active', health: 100, latency: '4ms' },
+    ];
+
+    return (
+        <div className="h-full flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-cyan-400" />
+                    <span className="text-sm font-semibold text-white">Layer Health</span>
+                </div>
+                <div className="text-[10px] font-mono text-white/30">6 LAYERS</div>
+            </div>
+
+            {/* Layer List */}
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {layers.map(layer => (
+                    <LayerRow key={layer.id} layer={layer} />
                 ))}
             </div>
         </div>

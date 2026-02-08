@@ -10,64 +10,64 @@ export default {
             fontFamily: {
                 sans: ['"Inter"', '"Roboto"', 'sans-serif'],
                 mono: ['"JetBrains Mono"', 'monospace'],
-                // Removed 'industrial' font to ensure clean confident typography
+                main: ['Inter', 'sans-serif'],
             },
             colors: {
-                // "Glass Fortress" Palette
+                // --- NIGHTFALL PALETTE ---
+                // Rich black theme inspired by CrowdStrike, Datadog Security
+                nightfall: {
+                    base: '#0f0f14',       // Main background (rich black)
+                    panel: '#181824',      // Card/Panel backgrounds  
+                    elevated: '#1f1f2e',   // Hover states, inputs
+                    border: '#2a2a3c',     // All borders
+                },
+                // Semantic tokens
                 veil: {
-                    bg: '#0a0a0a', // Tech Black (Look Cycle Base)
-                    sub: '#080A12',
-                    card: '#0F111A',
-                    border: '#1E2330',
+                    // Backgrounds
+                    bg: '#0f0f14',
+                    sub: '#181824',
+                    panel: '#181824',
+                    border: '#2a2a3c',
 
-                    // The "Trust" Accents
-                    accent: {
-                        DEFAULT: '#3B82F6',
-                        hover: '#2563EB',
-                        dim: 'rgba(59, 130, 246, 0.05)',
-                        glow: 'rgba(59, 130, 246, 0.5)',
-                    },
-                    // LOOK CYCLE / MONDRIAN TOKENS
-                    mondrian: {
-                        red: '#e30613',
-                        yellow: '#ffc20e',
-                        blue: '#009fe3',
-                        white: '#ffffff',
-                    },
-                    secondary: {
-                        DEFAULT: '#8B5CF6',
-                        dim: 'rgba(139, 92, 246, 0.1)',
-                    },
+                    // Text
+                    'text-primary': '#e8e8ee',
+                    'text-secondary': '#a1a1aa',
+                    'text-muted': '#5a5a6a',
 
-                    // State Colors (Clean)
-                    success: '#10B981',
-                    alert: '#EF4444',
+                    // Status colors (vibrant but not oversaturated)
+                    accent: '#3b82f6',     // Blue-500 - Primary actions
+                    trust: '#22c55e',      // Green-500 - Trust/"secure" 
+                    alert: '#ef4444',      // Red-500 - Critical alerts
+                    warning: '#f59e0b',    // Amber-500 - Caution/warning
+                    success: '#10b981',    // Emerald-500 - Success
+                    info: '#06b6d4',       // Cyan-500 - Info indicators
 
-                    text: {
-                        primary: '#FFFFFF', // Pure White
-                        secondary: '#94A3B8', // Smooth Liquid Metal Grey
-                        muted: '#475569', // Deep Grey
-                    }
+                    // Dim versions for backgrounds
+                    'trust-dim': 'rgba(34, 197, 94, 0.1)',
+                    'alert-dim': 'rgba(239, 68, 68, 0.1)',
+                    'audit-dim': 'rgba(245, 158, 11, 0.1)',
+                    audit: '#f59e0b',
                 }
             },
             backgroundImage: {
-                'void-gradient': 'linear-gradient(180deg, #020408 0%, #0F111A 100%)',
-                'glass-shine': 'linear-gradient(120deg, rgba(255,255,255,0.03) 0%, transparent 50%)',
-                'glow-mesh': 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 60%)',
+                'nightfall-gradient': 'linear-gradient(180deg, #181824 0%, #0f0f14 100%)',
+                'grid-subtle': 'linear-gradient(to right, rgba(42,42,60,0.3) 1px, transparent 1px), linear-gradient(to bottom, rgba(42,42,60,0.3) 1px, transparent 1px)',
+            },
+            borderRadius: {
+                DEFAULT: '0.25rem',
+                'md': '0.375rem',
+                'lg': '0.5rem',
             },
             animation: {
-                'float': 'float 8s ease-in-out infinite',
-                'pulse-soft': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'fade-in': 'fadeIn 0.3s ease-out',
             },
             keyframes: {
-                float: {
-                    '0%, 100%': { transform: 'translateY(0)' },
-                    '50%': { transform: 'translateY(-15px)' },
+                fadeIn: {
+                    from: { opacity: 0, transform: 'translateY(4px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' }
                 }
-            },
-            gridTemplateColumns: {
-                '24': 'repeat(24, minmax(0, 1fr))',
-            },
+            }
         },
     },
     plugins: [],
