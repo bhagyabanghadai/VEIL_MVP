@@ -210,6 +210,66 @@ async def get_insights():
         "criticalAlerts": []
     }
 
+# --- Layer Health Endpoint ---
+@router.get("/layers")
+async def get_layers():
+    """Return health status of all security layers."""
+    return [
+        {"id": "L0", "name": "Smart Valve", "status": "active", "latency": 12, "health": 100},
+        {"id": "L1", "name": "Firewall", "status": "active", "latency": 4, "health": 100},
+        {"id": "L2", "name": "Rate Limiter", "status": "active", "latency": 2, "health": 98},
+        {"id": "L3", "name": "Anomaly Detector", "status": "degraded", "latency": 45, "health": 85},  # Simulated degradation
+        {"id": "L4", "name": "AI Judge", "status": "active", "latency": 800, "health": 100},
+        {"id": "L5", "name": "Ledger", "status": "active", "latency": 15, "health": 100},
+        {"id": "L6", "name": "Policy Engine", "status": "active", "latency": 8, "health": 100}
+    ]
+
+# --- Threat Map Endpoint (Simulation) ---
+@router.get("/threats")
+async def get_threats():
+    """Return active threats with simulated geo-data."""
+    # In production, this would come from a geo-IP database of blocked requests
+    import random
+    
+    threats = []
+    # Simulate 5-10 active threats
+    for _ in range(random.randint(5, 10)):
+        threats.append({
+            "id": hashlib.md5(f"{time.time()}:{random.random()}".encode()).hexdigest()[:8],
+            "lat": random.uniform(-50, 70),
+            "lng": random.uniform(-120, 140),
+            "severity": random.choice(["low", "medium", "high"]),
+            "source_ip": f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}",
+            "type": random.choice(["DDoS", "SQL Injection", "Brute Force", "Data Exfiltration"])
+        })
+        
+    return threats
+
+# --- Stats Endpoint (Aggregated Metrics) ---
+@router.get("/v1/stats")
+async def get_stats():
+    """Return aggregated statistics for the dashboard."""
+    logs = await get_logs()
+    total = len(logs)
+    blocked = len([l for l in logs if l["decision"] == "deny"])
+    
+    # Calculate recent activity (last 24h simulation)
+    recent_logs = []
+    for log in logs[-10:]:
+        recent_logs.append({
+            "path": log["actionContent"],
+            "status": 200 if log["decision"] == "allow" else 403,
+            "latency": log.get("latency", 15),  # Mock latency if missing
+            "timestamp": int(time.time() * 1000)
+        })
+
+    return {
+        "total_requests": 1000 + total,  # Offset for demo visuals
+        "allowed_count": (1000 + total) - (50 + blocked),
+        "blocked_count": 50 + blocked,
+        "recent_logs": recent_logs
+    }
+
 # --- Validation Endpoint (Core VEIL Integration) ---
 @router.post("/validate")
 async def validate_action(req: ValidateRequest):
@@ -259,3 +319,60 @@ async def validate_action(req: ValidateRequest):
         "signature": hashlib.sha256(f"{req.agentId}:{req.actionContent}".encode()).hexdigest()[:16],
         "usedThinking": req.useThinking
     }
+
+# --- Initialization (Pre-seed Demo Data) ---
+def init_demo_data():
+    """Populate DB with demo data if empty."""
+    if not AGENTS_DB:
+        # Agent 1: Nexus Prime
+        id1 = "agent-alpha"
+        AGENTS_DB[id1] = {
+            "id": id1,
+            "name": "Nexus Prime",
+            "purpose": "Core System Optimization",
+            "description": "Primary autonomous node for system-wide performance tuning.",
+            "riskLevel": "high",
+            "allowedCapabilities": ["network_access", "file_write", "system_exec"],
+            "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "policyIds": [],
+            "veilMeta": {
+                "securityAnalysis": "High privilege node. Requires continuous L4 monitoring.",
+                "misusePotential": 85,
+                "recommendedLimitations": ["block_external_ips"],
+                "veilVersion": "2.1"
+            }
+        }
+        
+        # Agent 2: Sentinel
+        id2 = "agent-beta"
+        AGENTS_DB[id2] = {
+            "id": id2,
+            "name": "Sentinel V",
+            "purpose": "Threat Detection",
+            "description": "Passive scanning unit for identifying network anomalies.",
+            "riskLevel": "low",
+            "allowedCapabilities": ["network_read"],
+            "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "policyIds": [],
+            "veilMeta": {
+                "securityAnalysis": "Low risk read-only agent.",
+                "misusePotential": 10,
+                "recommendedLimitations": [],
+                "veilVersion": "2.1"
+            }
+        }
+        logger.info("⚡ Demo Agents Initialized")
+
+    if not POLICIES_DB:
+        id1 = "policy-core"
+        POLICIES_DB[id1] = {
+            "id": id1,
+            "name": "Core Safety Protocols",
+            "naturalLanguage": "Prevent any deletion of system logs and block external network connections to non-whitelisted IPs.",
+            "createdAt": time.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "structuredRules": {"rules": [{"id": "R1", "action": "block", "target": "delete_logs"}]}
+        }
+        logger.info("⚡ Demo Policies Initialized")
+
+# Run initialization
+init_demo_data()
