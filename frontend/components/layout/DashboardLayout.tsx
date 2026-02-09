@@ -70,15 +70,25 @@ const Sidebar = () => {
 
     return (
         <aside className="w-64 h-screen sticky top-0 bg-slate-900 border-r border-slate-800 flex flex-col">
-            {/* Logo */}
+            {/* Logo - Click to go to landing page */}
             <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                    <Shield className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                    <span className="text-lg font-bold text-white">VEIL</span>
-                    <span className="text-[10px] text-slate-500 block -mt-1">Security OS</span>
-                </div>
+                <Link
+                    to="/"
+                    onClick={() => {
+                        // Clear auth to show landing page
+                        localStorage.removeItem('veil_token');
+                    }}
+                    className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+                    title="Go to Landing Page"
+                >
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                        <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                        <span className="text-lg font-bold text-white">VEIL</span>
+                        <span className="text-[10px] text-slate-500 block -mt-1">Security OS</span>
+                    </div>
+                </Link>
             </div>
 
             {/* Navigation - Optimized with LayoutGroup and layoutDependency */}
