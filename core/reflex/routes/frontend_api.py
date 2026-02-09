@@ -7,8 +7,20 @@ import json
 import os
 import hashlib
 import time
-from fastapi import APIRouter, HTTPException, Depends, Header
+from fastapi import APIRouter, HTTPException, Depends, Header, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from core.reflex.services.auth import (
+    create_access_token,
+    get_current_user,
+    require_agent_read,
+    require_agent_write,
+    require_policy_read,
+    require_policy_write,
+    require_log_read,
+    require_admin,
+    UserInfo,
+    SCOPES
+)
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
@@ -52,20 +64,37 @@ class ValidateRequest(BaseModel):
 @router.post("/auth/login")
 async def login(req: LoginRequest):
     """
-    Simple login endpoint for MVP.
-    In production, use proper OAuth2/JWT with password hashing.
+    Login endpoint with JWT token generation.
+    Returns token with OAuth2 scopes based on user role.
+    
+    Scopes granted by role:
+    - admin: Full access
+    - operator: Read/write agents, read policies/logs
+    - viewer: Read-only access
+    - user: Limited read access
     """
     # MVP: Accept any non-empty username/password
     if not req.username or not req.password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    # Generate a simple token (NOT for production!)
-    token = hashlib.sha256(f"{req.username}:{time.time()}".encode()).hexdigest()[:32]
+    # Determine role (MVP: admin if username is admin)
+    role = "admin" if req.username == "admin" else "user"
+    user_id = hashlib.md5(req.username.encode()).hexdigest()[:8]
+    email = f"{req.username}@veil.local"
+    
+    # Generate JWT token with proper scopes
+    token = create_access_token(
+        user_id=user_id,
+        username=req.username,
+        email=email,
+        role=role
+    )
     
     return {
         "token": token,
-        "role": "admin" if req.username == "admin" else "user",
-        "user": {"name": req.username, "email": f"{req.username}@veil.local"}
+        "role": role,
+        "user": {"name": req.username, "email": email},
+        "scopes": SCOPES  # Return available scopes for UI
     }
 
 @router.post("/auth/register")
@@ -78,12 +107,13 @@ async def register(name: str = "", email: str = "", password: str = ""):
 
 # --- Agents Endpoints ---
 @router.get("/agents")
-async def get_agents():
-    """Return all registered agents."""
+async def get_agents(user: UserInfo = Security(get_current_user, scopes=["read:agents"])):
+    """Return all registered agents. Requires read:agents scope."""
+    logger.info(f"📋 Agents list requested by: {user.username}")
     return list(AGENTS_DB.values())
 
 @router.post("/agents")
-async def create_agent(agent: AgentCreate):
+async def create_agent(agent: AgentCreate, user: UserInfo = Security(get_current_user, scopes=["write:agents"])):
     """Register a new agent."""
     agent_id = f"agent-{hashlib.md5(agent.name.encode()).hexdigest()[:8]}"
     new_agent = {
@@ -107,19 +137,22 @@ async def create_agent(agent: AgentCreate):
     return new_agent
 
 @router.delete("/agents/{agent_id}")
-async def delete_agent(agent_id: str):
+async def delete_agent(agent_id: str, user: UserInfo = Security(get_current_user, scopes=["write:agents"])):
+    """Delete an agent. Requires write:agents scope."""
+    logger.info(f"🗑️ Agent {agent_id} deleted by: {user.username}")
     if agent_id in AGENTS_DB:
         del AGENTS_DB[agent_id]
     return {"status": "deleted"}
 
 # --- Policies Endpoints ---
 @router.get("/policies")
-async def get_policies():
-    """Return all policies."""
+async def get_policies(user: UserInfo = Security(get_current_user, scopes=["read:policies"])):
+    """Return all policies. Requires read:policies scope."""
+    logger.info(f"📜 Policies list requested by: {user.username}")
     return list(POLICIES_DB.values())
 
 @router.post("/policies")
-async def create_policy(policy: PolicyCreate):
+async def create_policy(policy: PolicyCreate, user: UserInfo = Security(get_current_user, scopes=["write:policies"])):
     """Create a new policy."""
     policy_id = policy.id or f"policy-{hashlib.md5(policy.name.encode()).hexdigest()[:8]}"
     new_policy = {
@@ -134,7 +167,9 @@ async def create_policy(policy: PolicyCreate):
     return new_policy
 
 @router.delete("/policies/{policy_id}")
-async def delete_policy(policy_id: str):
+async def delete_policy(policy_id: str, user: UserInfo = Security(get_current_user, scopes=["write:policies"])):
+    """Delete a policy. Requires write:policies scope."""
+    logger.info(f"🗑️ Policy {policy_id} deleted by: {user.username}")
     if policy_id in POLICIES_DB:
         del POLICIES_DB[policy_id]
     return {"status": "deleted"}
@@ -157,8 +192,8 @@ async def convert_policy(data: dict):
 
 # --- Logs Endpoints ---
 @router.get("/logs")
-async def get_logs():
-    """Return audit log entries."""
+async def get_logs(user: UserInfo = Security(get_current_user, scopes=["read:logs"])):
+    """Return audit log entries. Requires read:logs scope."""
     # Read from VEIL ledger file if available
     ledger_file = os.getenv("LEDGER_FILE", "veil.ledger.jsonl")
     logs = []
