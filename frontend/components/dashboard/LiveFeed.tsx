@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Filter, ExternalLink } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -89,25 +90,35 @@ const LiveFeed: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/[0.03]">
-                        {events.map((e) => (
-                            <tr key={e.id} className="group hover:bg-white/[0.03] transition-colors">
-                                <td className="py-2 px-3 text-white/40">{e.timestamp}</td>
-                                <td className="py-2 px-2">
-                                    <span className={cn(
-                                        "px-2 py-0.5 rounded text-[10px] uppercase font-bold",
-                                        e.verdict === 'block'
-                                            ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
-                                            : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                                    )}>
-                                        {e.verdict}
-                                    </span>
-                                </td>
-                                <td className="py-2 px-2 text-white/50">{e.method}</td>
-                                <td className="py-2 px-2 text-white/70 group-hover:text-white">{e.path}</td>
-                                <td className="py-2 px-2 text-cyan-400/70">{e.source}</td>
-                                <td className="py-2 px-3 text-right text-white/30">{e.size}</td>
-                            </tr>
-                        ))}
+                        <AnimatePresence mode="popLayout">
+                            {events.map((e) => (
+                                <motion.tr
+                                    key={e.id}
+                                    className="group hover:bg-white/[0.03] transition-colors"
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    layout
+                                    layoutDependency={events.length}
+                                >
+                                    <td className="py-2 px-3 text-white/40">{e.timestamp}</td>
+                                    <td className="py-2 px-2">
+                                        <span className={cn(
+                                            "px-2 py-0.5 rounded text-[10px] uppercase font-bold",
+                                            e.verdict === 'block'
+                                                ? "bg-rose-500/20 text-rose-400 border border-rose-500/30"
+                                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                        )}>
+                                            {e.verdict}
+                                        </span>
+                                    </td>
+                                    <td className="py-2 px-2 text-white/50">{e.method}</td>
+                                    <td className="py-2 px-2 text-white/70 group-hover:text-white">{e.path}</td>
+                                    <td className="py-2 px-2 text-cyan-400/70">{e.source}</td>
+                                    <td className="py-2 px-3 text-right text-white/30">{e.size}</td>
+                                </motion.tr>
+                            ))}
+                        </AnimatePresence>
                     </tbody>
                 </table>
 

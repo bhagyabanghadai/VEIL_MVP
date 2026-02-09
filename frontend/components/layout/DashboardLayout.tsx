@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard,
@@ -81,32 +81,38 @@ const Sidebar = () => {
                 </div>
             </div>
 
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                {/* Dashboards Group */}
-                <NavItem
-                    icon={LayoutDashboard}
-                    label="Dashboard"
-                    href="/"
-                    active={location.pathname === '/'}
-                />
+            {/* Navigation - Optimized with LayoutGroup and layoutDependency */}
+            <LayoutGroup>
+                <motion.nav
+                    className="flex-1 p-4 space-y-1 overflow-y-auto"
+                    layout
+                    layoutDependency={openMenus.length}
+                >
+                    {/* Dashboards Group */}
+                    <NavItem
+                        icon={LayoutDashboard}
+                        label="Dashboard"
+                        href="/"
+                        active={location.pathname === '/'}
+                    />
 
-                <NavItem icon={User} label="Agents" href="/agents" active={location.pathname === '/agents'} />
-                <NavItem icon={Shield} label="Policies" href="/policies" active={location.pathname === '/policies'} badge={3} />
-                <NavItem icon={Database} label="Audit Ledger" href="/logs" active={location.pathname === '/logs'} />
+                    <NavItem icon={User} label="Agents" href="/agents" active={location.pathname === '/agents'} />
+                    <NavItem icon={Shield} label="Policies" href="/policies" active={location.pathname === '/policies'} badge={3} />
+                    <NavItem icon={Database} label="Audit Ledger" href="/logs" active={location.pathname === '/logs'} />
 
-                {/* Divider */}
-                <div className="py-4">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 px-4 mb-2">
-                        Management
+                    {/* Divider */}
+                    <div className="py-4">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-600 px-4 mb-2">
+                            Management
+                        </div>
                     </div>
-                </div>
 
-                <NavItem icon={Mail} label="Alerts" href="/alerts" badge="New" />
-                <NavItem icon={Terminal} label="Terminal" href="/terminal" />
-                <NavItem icon={FileText} label="Reports" href="/reports" />
-                <NavItem icon={Settings} label="Settings" href="/settings" active={location.pathname === '/settings'} />
-            </nav>
+                    <NavItem icon={Mail} label="Alerts" href="/alerts" badge="New" />
+                    <NavItem icon={Terminal} label="Terminal" href="/terminal" />
+                    <NavItem icon={FileText} label="Reports" href="/reports" />
+                    <NavItem icon={Settings} label="Settings" href="/settings" active={location.pathname === '/settings'} />
+                </motion.nav>
+            </LayoutGroup>
 
             {/* Bottom Status */}
             <div className="p-4 border-t border-slate-800">
