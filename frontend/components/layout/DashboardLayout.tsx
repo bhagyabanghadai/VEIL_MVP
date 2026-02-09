@@ -70,7 +70,7 @@ const Sidebar = () => {
 
     return (
         <aside className="w-64 h-screen sticky top-0 bg-slate-900 border-r border-slate-800 flex flex-col">
-            {/* Logo - Click to go to landing page */}
+            {/* Logo - Click to go to landing page (matches landing page logo) */}
             <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-800">
                 <Link
                     to="/"
@@ -81,8 +81,20 @@ const Sidebar = () => {
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
                     title="Go to Landing Page"
                 >
-                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-                        <Shield className="w-5 h-5 text-white" />
+                    {/* Ascension V Logo SVG - Same as landing page */}
+                    <div className="relative w-10 h-10 flex items-center justify-center">
+                        <svg width="40" height="40" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            {/* Left Wing */}
+                            <path d="M4 10 L24 44" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                            <path d="M10 14 L24 38" stroke="white" strokeWidth="1.5" strokeLinecap="square" opacity="0.6" />
+                            <path d="M16 18 L24 32" stroke="white" strokeWidth="1.5" strokeLinecap="square" opacity="0.4" />
+                            {/* Right Wing */}
+                            <path d="M44 10 L24 44" stroke="white" strokeWidth="1.5" strokeLinecap="square" />
+                            <path d="M38 14 L24 38" stroke="white" strokeWidth="1.5" strokeLinecap="square" opacity="0.6" />
+                            <path d="M32 18 L24 32" stroke="white" strokeWidth="1.5" strokeLinecap="square" opacity="0.4" />
+                            {/* Core Diamond */}
+                            <rect x="22" y="8" width="4" height="4" fill="#34d399" transform="rotate(45 24 10)" className="drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                        </svg>
                     </div>
                     <div>
                         <span className="text-lg font-bold text-white">VEIL</span>
