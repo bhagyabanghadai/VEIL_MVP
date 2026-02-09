@@ -99,8 +99,8 @@ function AppContent() {
   const navigate = useNavigate();
 
   // --- CORE STATE ---
-  // TEMP: Auto-authenticate for development (login files preserved for later)
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  // Check localStorage for existing auth token
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('veil_token'));
   const [agents, setAgents] = useState<Agent[]>([]);
   const [policies, setPolicies] = useState<Policy[]>([]);
   const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([]);
